@@ -49,6 +49,17 @@ The application reads environment variables. A `.env` file is not automatically 
 | `VAULT_ENABLED_RELEASES` | Comma-separated explicitly enabled release keys; empty by default. |
 | `VAULT_ENABLED_EVENTS` | Comma-separated explicitly enabled exclusive-event keys; empty by default. |
 
+For a launching shell, replace the example IDs and export the configuration explicitly:
+
+```bash
+export VAULT_ROOT="$PWD"
+export VAULT_GUILD_ID="YOUR_SERVER_ID"
+export VAULT_ACTIVITY_CHANNEL_IDS="YOUR_PUBLIC_CHANNEL_ID,ANOTHER_PUBLIC_CHANNEL_ID"
+export DISCORD_TOKEN_FILE="$HOME/.config/venator-vault/bot-token"
+export VAULT_ENABLED_RELEASES=""
+export VAULT_ENABLED_EVENTS=""
+```
+
 Use real IDs from your own server. The encounter channel is selected later with `/vault-admin setup`; automatic activity credit is restricted to the configured conversation channels.
 
 Provision your token interactively after substituting your own bot application ID:

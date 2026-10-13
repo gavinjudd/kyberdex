@@ -4,7 +4,7 @@ KyberDex is self-hosted software. Only the latest code on the default branch is 
 
 ## Report a vulnerability
 
-Use GitHub's private vulnerability reporting flow when it is enabled on this repository: [Report a vulnerability](https://github.com/gavinjudd/kyberdex/security/advisories/new).
+Private vulnerability reporting is enabled. Use GitHub's private reporting flow: [Report a vulnerability](https://github.com/gavinjudd/kyberdex/security/advisories/new).
 
 If that private channel is unavailable, open an issue titled **Security contact requested** with no exploit details, credentials, personal data or affected deployment addresses. Wait for the maintainer to establish a private reporting route before sharing sensitive material.
 

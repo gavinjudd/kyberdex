@@ -12,6 +12,10 @@ if systemctl --user is-active --quiet venator-vault.service; then
 fi
 python3 -c 'import sys; assert sys.version_info >= (3,13), "Python 3.13+ is required"'
 [ -d .venv ] || python3 -m venv .venv
+# uv-created environments omit pip; use the interpreter's bundled bootstrap.
+if ! .venv/bin/python -m pip --version >/dev/null 2>&1; then
+  .venv/bin/python -m ensurepip --upgrade
+fi
 PIP_CONFIG_FILE=/dev/null .venv/bin/python -m pip --isolated install --index-url https://pypi.org/simple --require-hashes --only-binary=:all: -r deploy/requirements-test.txt
 .venv/bin/python - <<'PY'
 import sysconfig

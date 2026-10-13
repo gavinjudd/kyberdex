@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gavinjudd.github.io/kyberdex/sitemap.xml
