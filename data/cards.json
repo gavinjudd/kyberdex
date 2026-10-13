@@ -126,7 +126,7 @@
       "other_legends": "Unrelated Legends content remains event-only and requires explicit activation, UTC windows and lifetime supply rules.",
       "identity": "Three Revan portrayals share subject_id=darth-revan. Different centuries/phases do not mean different people."
     },
-    "public_distribution": "Card art paths and art_status describe the expected reviewed asset contract. Images and the private art manifest are not bundled. Startup separately verifies local files, dimensions, hashes and reviewed manifest entries; metadata alone cannot enable gameplay."
+    "public_distribution": "Card art paths and art_status describe the expected reviewed asset contract. Run setup-art to download recorded sources and reconstruct reviewed images locally using data/art-sources.json. Subject images are not bundled. Startup separately verifies local files, dimensions, hashes and reviewed manifest entries; metadata alone cannot enable gameplay."
   },
   "cards": [
     {

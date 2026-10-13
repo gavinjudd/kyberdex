@@ -8,7 +8,7 @@
 [![Python 3.13+](https://img.shields.io/badge/Python-3.13%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green.svg)](LICENSE)
 
-> **What a fresh clone can do:** run the offline tests, inspect the game engine and browse the catalog. **To start Discord gameplay:** supply your own bot configuration and a reviewed artwork pack. Third-party Star Wars subject images, player data and production credentials are deliberately excluded. See [artwork setup](docs/ASSETS.md) and [licensing boundaries](NOTICE.md).
+> **One-command artwork setup:** `uv run venator-vault setup-art` downloads the catalog’s recorded source images and installs matching reviewed assets locally. You do not need to find hundreds of images yourself. Artwork stays out of Git; running your bot also needs your own Discord configuration. See [artwork setup](docs/ASSETS.md) and [source notices](NOTICE.md).
 
 ## Why KyberDex?
 
@@ -20,23 +20,25 @@
 | Reviewed trades & crafting | Two-sided escrow, revision-specific confirmations, exact consumption previews and protected favorites/loadouts. |
 | Ground & Fleet combat | Separate arenas, three-card squads, role abilities, faction bonuses and cooperative raid bosses. |
 | Transparent economy | Published rarity odds, free daily credits, daily market, crafting costs and bounded seasonal supply. No real-money purchases or paid rolls. |
-| Collectible presentation | Pillow card renderer with six rarity finishes, showcase layouts and limited-edition treatments. Subject art is operator-supplied. |
+| Collectible presentation | Pillow card renderer with six rarity finishes, showcase layouts and limited-edition treatments. Install subject art locally with `setup-art`. |
 | Durable operations | SQLite WAL, atomic ownership changes, persisted schedules, startup checks and integrity-checked backup/restore tools. |
 | Public web catalog | Searchable card definitions and reviewed artwork, without player inventory or mutation endpoints. |
 
-## Quick start: explore locally
+## Quick start
 
 Use **Python 3.13+** and [uv](https://docs.astral.sh/uv/getting-started/installation/) on **Linux or macOS**. The operational CLI uses POSIX file locks; native Windows operation is not supported. Use a Linux environment such as WSL for Windows development.
 
 ```bash
 git clone https://github.com/gavinjudd/kyberdex.git
 cd kyberdex
-uv sync --locked --extra dev
-uv run pytest
-uv run python -m venator_vault check
+uv sync --locked
+uv run venator-vault setup-art
+uv run venator-vault check --require-art
 ```
 
-The ordinary `check` command reports readiness without connecting to Discord. It creates local SQLite state when needed. Missing subject artwork is expected in the public checkout; a successful storage check alone is not gameplay readiness.
+`setup-art` fetches the recorded artwork sources, applies the recorded image transforms and checks the result against expected pixels. The first setup downloads about 175 MB of source files. Downloads are cached and setup can be rerun after an interruption. The readiness check runs without connecting to Discord and creates local SQLite state when needed.
+
+For offline code exploration, skip `setup-art` and run `uv run venator-vault check` without `--require-art`; the catalog remains browsable with unavailable-image placeholders. Downloading source artwork does not grant a license to reuse or redistribute it. [Artwork setup and source details →](docs/ASSETS.md)
 
 Browse the local catalog:
 
@@ -44,7 +46,7 @@ Browse the local catalog:
 uv run python -m venator_vault.web --root . --host 127.0.0.1 --port 8765
 ```
 
-Open **http://127.0.0.1:8765**. Card definitions remain available; excluded artwork is shown as unavailable. The project website is documentation, not a hosted game or a view of anyone's collection.
+Open **http://127.0.0.1:8765**. Completed artwork setup adds the card illustrations; any artwork not installed is shown as unavailable. The project website is documentation, not a hosted game or a view of anyone's collection.
 
 **Keep the checkout:** runtime code expects `data/`, `assets/` and `web/` alongside the source. Installing only a wheel does not provide a complete bot. The historical Python package and CLI names remain `venator_vault` and `venator-vault`.
 
@@ -54,7 +56,7 @@ The [full setup guide](docs/SETUP.md) covers Discord permissions, configuration 
 
 1. Create your own dedicated Discord bot application for one server.
 2. Configure your guild, activity channels and protected token file.
-3. Provide artwork you have permission to use and complete [the artwork manifest and visual review](docs/ASSETS.md).
+3. Run `uv run venator-vault setup-art` to install the recorded artwork locally.
 4. Run `uv run python -m venator_vault check --require-art --require-token-file`.
 5. Start `uv run python -m venator_vault run`, then use `/vault-admin setup` in your server.
 

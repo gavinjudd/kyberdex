@@ -231,8 +231,9 @@ def test_new_gates_refuse_launch_before_any_gateway(tmp_path, monkeypatch, gate,
 
 
 def test_public_checkout_without_art_fails_launch_readiness(tmp_path):
-    settings = Settings(ROOT, tmp_path / "public-check.sqlite", ROOT / "data/cards.json", None, 42)
+    # The developer may have run setup-art; use a separate empty asset root.
+    settings = Settings(tmp_path, tmp_path / "public-check.sqlite", ROOT / "data/cards.json", None, 42)
     report = ops.readiness(settings)
     assert not report["launch_art_ready"]
     assert report["missing_art_count"] > 0
-    assert not (ROOT / "assets/art/manifest.json").exists()
+    assert not (tmp_path / "assets/art/manifest.json").exists()

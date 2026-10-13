@@ -6,7 +6,7 @@ The public [`data/cards.json`](../data/cards.json) is the source of card definit
 
 Definitions record names, accepted aliases, faction, era, arena, role, ability, source references and continuity. Regular collection includes canon plus explicitly selected alternate/game continuity, including LEGO alternate stories, 2003 Clone Wars, Knights of the Old Republic, Knights of the Old Republic II and The Old Republic. The games' published Legends provenance remains visible. Their inclusion is a collection-design decision, not a canon reclassification.
 
-Humorous treatments use established scenes or alternate stories. Event-exclusive material uses deliberate eligibility rules. Content references explain provenance; they do not grant permission to redistribute source illustrations. No third-party subject art is bundled in the public release.
+Humorous treatments use established scenes or alternate stories. Event-exclusive material uses deliberate eligibility rules. Content references explain provenance; they do not grant permission to redistribute source illustrations. No third-party subject art is bundled in Git; `setup-art` downloads the recorded sources locally. See [artwork setup](ASSETS.md).
 
 ## Rarity probabilities
 

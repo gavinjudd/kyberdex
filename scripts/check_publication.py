@@ -16,7 +16,7 @@ PATTERNS = {
     "Discord token": re.compile(r"[A-Za-z0-9_-]{23,30}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,}"),
     "Discord webhook": re.compile(r"https://(?:canary\.|ptb\.)?discord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9_-]+"),
 }
-PRIVATE_PARTS = {"state", "backups", "work", ".venv", "__pycache__"}
+PRIVATE_PARTS = {"state", "backups", "work", ".venv", "__pycache__", ".cache"}
 
 def main():
     paths = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")

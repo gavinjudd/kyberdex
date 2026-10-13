@@ -1,10 +1,31 @@
-# Artwork packs and asset review
+# Automatic artwork setup
 
-The public repository includes card definitions, rendering code, fonts and finish assets. It deliberately excludes the deployed bot's third-party Star Wars subject artwork because redistribution permission has not been established. The MIT software license does not supply that permission. See [NOTICE.md](../NOTICE.md).
+Install the collection's recorded artwork with one command. Stop an existing bot worker before installing or repairing assets:
 
-Bring images you have permission to use in your intended deployment. Do not treat a public image URL, fan-wiki citation, hash or completed visual review as a copyright license. Keep your source/license evidence separate from technical readiness, and do not publish a pack unless its redistribution terms permit it.
+```bash
+uv run venator-vault setup-art
+uv run venator-vault check --require-art
+```
 
-## The asset contract
+The catalog has 851 card definitions backed by 847 distinct PNG files, including seasonal treatments. Installing seasonal artwork does not enable those releases. You do not need to locate or manually configure each image. The installer fetches the recorded official source images, applies the recorded crop, sizing and brightness transforms, and compares the result with expected reviewed pixel hashes before installing it.
+
+Setup reads the tracked source recipes in [`data/art-sources.json`](../data/art-sources.json). It verifies the downloaded file's SHA-256 and the transformed image's reviewed RGB pixel hash, then writes the local PNG and its actual file hash into the runtime manifest. Pixel verification allows the installer to reproduce the reviewed image without requiring identical PNG compression bytes.
+
+The first run downloads about 175 MB of source files and generates the local PNG collection. Allow about 1 GB of free disk space for the artwork and download cache. Downloads are cached under `.cache/kyberdex-art/raw/`. Setup skips verified installed outputs and resumes incomplete work when you rerun it. If a source cannot be fetched or no longer matches, setup exits unsuccessfully with counts and per-asset error details; successful files and cached downloads remain available for the next attempt. Changed source content is not silently accepted.
+
+The follow-up readiness check confirms the installed catalog's launch gates. Artwork setup does not connect to Discord or start gameplay. Supply your own guild and protected token configuration before running the bot.
+
+## If a download fails
+
+Rerun `uv run venator-vault setup-art` after a temporary network or source-host failure. If the error reports changed bytes or pixels, keep the failure and report the card/source identifier with sanitized output. A maintainer must review a replacement source recipe; deleting the expected hash is not a valid repair.
+
+## Source and licensing notice
+
+Image files are downloaded to your machine, not distributed in this Git repository. The source records describe where images came from and how to reproduce them; hashes establish integrity, not copyright ownership. Downloading an image does not grant a reuse or redistribution license. Use the images only as permitted by their owners and your intended deployment. See [NOTICE.md](../NOTICE.md).
+
+The normal setup reuses the recorded review only when the reproduced pixels match. You do not need to re-review every unchanged image. Replacing a source or changing its pixels requires a new review, described below.
+
+## What startup verifies
 
 The launch check uses `verified_art_path()` in [`src/venator_vault/__main__.py`](../src/venator_vault/__main__.py). For each card required by the enabled catalog, it verifies:
 
@@ -18,7 +39,9 @@ The launch check uses `verified_art_path()` in [`src/venator_vault/__main__.py`]
 
 The image is source art. The renderer later composes it into a 5:7 collectible card; do not substitute an already labeled finished card as capture artwork, which would disclose the answer.
 
-## Build a pack honestly
+## Advanced: replace images or build your own pack
+
+For custom artwork, follow this process instead of marking an unverified replacement ready:
 
 1. Choose a source you can use and record its origin, license or permission and the depicted subject/phase.
 2. Crop to a 2:3 PNG, keeping important features clear of the finished card's title, stats and edition elements.

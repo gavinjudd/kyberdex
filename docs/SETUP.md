@@ -1,18 +1,17 @@
 # Self-hosting KyberDex
 
-KyberDex runs from a source checkout on Linux or macOS with Python 3.13+. Plan for one dedicated Discord bot application, one guild and one active game worker per deployment. A clean clone supports offline development and catalog browsing; Discord gameplay also requires an operator-provided, reviewed artwork pack.
+KyberDex runs from a source checkout on Linux or macOS with Python 3.13+. Plan for one dedicated Discord bot application, one guild and one active game worker per deployment. A clean clone supports offline development and catalog browsing. The `setup-art` command installs the recorded artwork locally for gameplay; you do not need to source 851 card images by hand.
 
 ## 1. Install and verify offline
 
 ```bash
 git clone https://github.com/gavinjudd/kyberdex.git
 cd kyberdex
-uv sync --locked --extra dev
-uv run pytest
+uv sync --locked
 uv run python -m venator_vault check
 ```
 
-Keep the repository directory: the package uses the adjacent `data`, `assets` and `web` directories. The check command initializes local state and reports artwork/presentation/catalog readiness. It does not connect to Discord. Without artwork, `launch_art_ready` remains false.
+Keep the repository directory: the package uses the adjacent `data`, `assets` and `web` directories. The check command initializes local state and reports artwork/presentation/catalog readiness. It does not connect to Discord. Until you run artwork setup, `launch_art_ready` remains false.
 
 For a read-only catalog preview:
 
@@ -72,11 +71,18 @@ The helper uses hidden input and defaults to `~/.config/venator-vault/bot-token`
 
 The token must be entered locally and kept private. `check --require-token-file` checks credential metadata without displaying its contents. The run command reads the token only after readiness gates pass.
 
-## 4. Supply and review artwork
+## 4. Install artwork automatically
 
-Follow [ASSETS.md](ASSETS.md). Every card required for the enabled catalog must have matching local PNG bytes, dimensions, hash, subject identity and review metadata. Enabled future releases are checked before their release window begins.
+```bash
+uv run venator-vault setup-art
+uv run venator-vault check --require-art
+```
 
-The included 851 definitions are not a ready-to-launch artwork pack. The default startup contract also requires at least 800 distinct regular subjects and reviewed combat profiles. Reducing the catalog to a few cards requires a deliberate engine/test change; it is not a supported configuration shortcut.
+The setup command downloads recorded sources, reproduces the recorded image transforms and installs assets only when they match the expected reviewed pixels. The first setup downloads about 175 MB of source files; it uses a local cache and can be rerun after an interrupted download. Source images and generated PNGs remain local and ignored by Git.
+
+The catalog contains 851 definitions backed by 847 distinct PNG files; some treatments share an asset. See [artwork setup](ASSETS.md) for retry behavior, source notices and replacing images with your own. The downloader does not grant copyright permission.
+
+The default startup contract also requires at least 800 distinct regular subjects and reviewed combat profiles. Reducing the catalog to a few cards requires a deliberate engine/test change; it is not a supported configuration shortcut. Enabled future releases are checked before their release window begins.
 
 ## 5. Pass preflight and connect
 
@@ -99,11 +105,12 @@ Enable and verify backups before collecting player state. Follow [OPERATIONS.md]
 
 | Symptom | Check |
 | --- | --- |
-| `launch_art_ready: false` | Expected in a fresh clone. Complete the artwork pack and manifest; inspect `missing_art_sample`. |
+| `launch_art_ready: false` | Run or rerun `uv run venator-vault setup-art`, then strict readiness. Inspect failed downloads and `missing_art_sample`. |
+| Artwork setup reports an unavailable or changed source | Keep the reported failure; retry after a temporary network problem. A changed image needs an updated reviewed source record, not a bypassed hash check. |
 | Token permissions rejected | Use an owned regular file with mode `0400`/`0600`, not a symlink or shared file. |
 | Bot cannot start without guild configuration | Set `VAULT_GUILD_ID` to your own server ID. |
 | Bot online, no automatic drops | Check setup/pause state, approved activity channels and fresh eligible human activity. Quiet periods intentionally suppress automatic drops. |
 | Commands or images fail | Check bot installation, guild scope and channel permissions, especially Attach Files and Embed Links. |
-| Worker already running | Stop the existing worker before check/restore/start operations that acquire the worker lock. |
+| Worker already running | Stop the existing worker before setup-art/check/restore/start operations that acquire the worker lock. |
 | Catalog image unavailable | Confirm both card and manifest status, `visual_qa`, path, subject, exact SHA-256 and 2:3 PNG dimensions. |
 | Windows import error for `fcntl` | Use Linux/WSL; the operations CLI needs POSIX locks. |

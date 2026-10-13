@@ -29,7 +29,7 @@ Operational snapshots preserve the game/runtime pair consistently. Restore valid
 
 Discord commands and components adapt requests into game operations. Successful database changes are not undone merely because a later image delivery fails. Gateway/network requests have bounded handling. Rendering runs outside the gateway event loop, through a single rendering lane with a cache bounded to 48 entries and 32 MiB by default.
 
-The renderer binds fonts/finishes to manifests and composes operator-supplied subject art. The startup path checks matching source-art metadata and hashes before the bot connects. Rendering success alone does not imply full launch readiness.
+The renderer binds fonts/finishes to manifests and composes locally installed subject art. The startup path checks matching source-art metadata and hashes before the bot connects. Rendering success alone does not imply full launch readiness.
 
 ## Public and private data
 
@@ -43,7 +43,7 @@ Automatic activity credit uses message metadata without reading or storing ordin
 - **Linux/macOS operations.** POSIX locks and filesystem permission checks are part of the CLI. Linux systemd examples are supplied separately.
 - **Checkout-based runtime.** A wheel alone does not contain the full catalog, fonts, finishes and web UI.
 - **Local durable storage.** Keep databases on a reliable filesystem. SQLite is not a distributed storage or active-active replication design.
-- **Operator-provided subject art.** Offline development is available immediately; live encounters require the full reviewed artwork set and explicit Discord configuration.
+- **Local artwork setup.** `setup-art` fetches recorded sources and installs assets that reproduce the expected reviewed pixels. Images remain outside Git. Live encounters require successful strict readiness and explicit Discord configuration.
 - **Small public catalog server.** The built-in HTTP server is not a general application hosting or authentication layer.
 - **No cross-bot integration.** KyberDex does not import inventories or trade through another collection bot.
 

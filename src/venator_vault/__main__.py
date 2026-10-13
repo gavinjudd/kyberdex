@@ -554,6 +554,9 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="KyberDex bot and operations")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("run", help="Connect the dedicated bot to Discord")
+    art = commands.add_parser("setup-art", help="Download pinned artwork sources and reproduce reviewed images")
+    art.add_argument("--sources", type=Path, help="Recipe registry (default: data/art-sources.json)")
+    art.add_argument("--workers", type=int, default=4, help="Concurrent downloads/transforms, 1–4 (default: 4)")
     check = commands.add_parser("check", help="Validate storage, catalog, artwork and card presentation without connecting")
     check.add_argument("--require-art", action="store_true")
     check.add_argument(
@@ -569,6 +572,13 @@ def main(argv=None):
     os.umask(0o077)
     try:
         settings = Settings.from_env()
+        if args.command == "setup-art":
+            from .art_setup import setup_art
+            with worker_lock(settings):
+                report = setup_art(settings.root, sources=args.sources, workers=args.workers,
+                                   progress=lambda message: print(message, file=sys.stderr, flush=True))
+            print(json.dumps(report, indent=2))
+            return 0 if report["complete"] else 1
         if args.command == "backup":
             backup(settings, args.destination, args.keep)
         elif args.command == "restore":

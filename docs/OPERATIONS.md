@@ -2,6 +2,15 @@
 
 Operate one KyberDex worker per deployment. Keep the checkout, token, databases and backup paths under a dedicated unprivileged account. Backups contain player identifiers and game state; keep them private and outside public repositories.
 
+## Install or repair artwork
+
+```bash
+uv run venator-vault setup-art
+uv run venator-vault check --require-art
+```
+
+Stop the running bot before artwork setup; the CLI acquires the exclusive worker lock. The installer reuses verified outputs and its local download cache. A partial failure leaves successful files in place; rerun after resolving the reported source or network issue. This command neither starts the bot nor enables seasonal releases. See [artwork setup](ASSETS.md).
+
 ## Readiness
 
 ```bash

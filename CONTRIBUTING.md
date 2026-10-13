@@ -12,7 +12,7 @@ uv run pytest
 uv run python -m venator_vault check
 ```
 
-The public checkout excludes third-party subject art. This is expected. Offline tests use isolated/synthetic assets and state; the catalog can be explored without a live Discord token. See [setup](docs/SETUP.md) before attempting a live bot deployment.
+The public checkout excludes third-party subject art from Git. `uv run venator-vault setup-art` installs it locally from recorded sources when needed. Offline tests use isolated/synthetic assets and state; the catalog can be explored without a live Discord token or an artwork download. See [setup](docs/SETUP.md) before attempting a live bot deployment.
 
 ## A good pull request
 
