@@ -1,4 +1,4 @@
-# KyberDex — open-source Discord card collection bot
+# KyberDex — open-source Star Wars Discord card bot
 
 **Collect, trade, craft and battle Star Wars cards in your Discord server.** KyberDex is a self-hosted Python Discord bot with a transactional SQLite game engine, 851 card definitions, separate Ground and Fleet battles, cooperative raids and a searchable web catalog. Built for Venator Command; released for developers and community operators to inspect, learn from and adapt.
 
