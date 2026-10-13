@@ -69,7 +69,8 @@ def bootstrap(tmp_path):
     base = tmp_path.resolve()
     binaries = base / 'tools'
     binaries.mkdir()
-    for name in ('cat', 'cp', 'dirname', 'mkdir', 'mktemp', 'mv', 'rm', 'rmdir', 'sh', 'tar', 'uname'):
+    # GNU tar invokes gzip via PATH; macOS's libarchive handles it internally.
+    for name in ('cat', 'cp', 'dirname', 'gzip', 'mkdir', 'mktemp', 'mv', 'rm', 'rmdir', 'sh', 'tar', 'uname'):
         target = shutil.which(name)
         assert target
         (binaries / name).symlink_to(target)
