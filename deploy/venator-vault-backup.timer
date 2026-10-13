@@ -1,0 +1,12 @@
+[Unit]
+Description=Back up KyberDex hourly
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=120
+AccuracySec=1
+Unit=venator-vault-backup.service
+
+[Install]
+WantedBy=timers.target

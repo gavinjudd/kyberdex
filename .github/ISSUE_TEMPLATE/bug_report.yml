@@ -1,0 +1,34 @@
+name: Bug report
+description: Report a reproducible problem in KyberDex
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Please use synthetic data. Never post tokens, private guild/player IDs, databases, backups or private logs. For vulnerabilities, follow SECURITY.md."
+  - type: input
+    id: revision
+    attributes:
+      label: Revision and environment
+      description: Commit or version, operating system, Python version
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the smallest reproducible example and relevant non-secret configuration.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Relevant test result or error; remove secrets and personal data.
+      render: text

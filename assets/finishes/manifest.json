@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "file": "prismatic-burst.png",
+  "sha256": "620bffae02951f01f0008744a8148196a000861280382bc6ba8e7b4652d47e2e",
+  "tool": "built-in image_gen",
+  "generated_at": "2026-10-08T13:52:26.843464+00:00",
+  "width": 1024,
+  "height": 1536,
+  "mode": "RGBA",
+  "purpose": "Transparent metallic foil embellishment; contains no card subject or typography",
+  "visual_qa": "Native transparent foil perimeter and central alpha verified; composed Legendary Falcon, Mythic Executor, Mythic limited Death Star, complete six-rarity and six-category proof sheets visually inspected. Metadata contrast and ground face clearance verified."
+}

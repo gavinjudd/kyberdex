@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Self-hosting documentation
+    url: https://github.com/gavinjudd/kyberdex/blob/main/docs/SETUP.md
+    about: Read installation, configuration and artwork requirements.
+  - name: Security policy
+    url: https://github.com/gavinjudd/kyberdex/blob/main/SECURITY.md
+    about: Report sensitive vulnerabilities privately.

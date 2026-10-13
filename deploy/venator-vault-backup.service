@@ -1,0 +1,21 @@
+[Unit]
+Description=Integrity-checked KyberDex backup
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/kyberdex
+EnvironmentFile=%h/.config/venator-vault/service.env
+ExecStart=%h/kyberdex/.venv/bin/python -m venator_vault backup --keep 168
+TimeoutStartSec=300
+TimeoutStopSec=30
+LimitCORE=0
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX
+MemoryMax=192M
+MemorySwapMax=0
+CPUQuota=30%
+TasksMax=16
+LimitNOFILE=1024

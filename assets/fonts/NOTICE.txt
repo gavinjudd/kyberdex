@@ -1,0 +1,18 @@
+Barlow runtime fonts for Venator Vault
+
+Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
+Licensed under the SIL Open Font License, Version 1.1; full text is in LICENSE.txt.
+
+The source fonts embed the above copyright plus an OFL1.1 notice and URL,
+not the full license text. The bundled full text was retrieved from Google
+Fonts' Barlow distribution and checked against the author's official OFL page:
+https://github.com/jpt/barlow/blob/main/OFL.txt
+https://raw.githubusercontent.com/google/fonts/main/ofl/barlow/OFL.txt
+
+BarlowCondensed-ExtraBold.otf is an unchanged copy of the selected source.
+Barlow-Regular.otf is the selected WOFF2 decompressed to its original
+OpenType CFF/SFNT container. CFF outline bytes, glyph order, cmap, names,
+metrics, GSUB, GPOS and GDEF were verified unchanged. The font is not TrueType.
+No typeface was redrawn, subsetted, renamed or otherwise modified.
+Both original Type Evidence IDs, source hashes/provenance and prepared hashes
+are preserved in manifest.json. No Univers or Franklin font is included.

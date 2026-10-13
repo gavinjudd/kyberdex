@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "prepared_at_utc": "2026-10-08T13:15:39.218806+00:00",
+  "fonts": [
+    {
+      "role": "heading",
+      "file": "BarlowCondensed-ExtraBold.otf",
+      "sha256": "e750c388cff27bd1aef1177fe66c9809175f0d5ba99d4819538b4689963986fe",
+      "family": "Barlow Condensed",
+      "style": "ExtraBold",
+      "weight": 800,
+      "source_id": "e750c388cff27bd1aef1177fe66c9809175f0d5ba99d4819538b4689963986fe:0",
+      "source_sha256": "e750c388cff27bd1aef1177fe66c9809175f0d5ba99d4819538b4689963986fe",
+      "source_urls": [
+        "https://github.com/bekahmcdonald/fonts",
+        "https://github.com/jpt/barlow"
+      ],
+      "source_provenance": {
+        "source_id": "bekah",
+        "path": "Foundries/Tribby Type/Barlow/otf/BarlowCondensed-ExtraBold.otf",
+        "url": "https://github.com/bekahmcdonald/fonts",
+        "commit": "7841ca896a9a770d5ea18fd5faef0eb91ad90ef3",
+        "upstream_path": "Foundries/Tribby Type/Barlow/otf/BarlowCondensed-ExtraBold.otf",
+        "container": "otf"
+      },
+      "license": "SIL Open Font License 1.1",
+      "license_file": "LICENSE.txt",
+      "notice_file": "NOTICE.txt",
+      "sfnt": "OpenType CFF",
+      "preparation": "exact binary copy",
+      "embedded_notices": {
+        "0": [
+          "Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)"
+        ],
+        "8": [
+          "Tribby Type"
+        ],
+        "9": [
+          "Jeremy Tribby"
+        ],
+        "11": [
+          "https://tribby.com/"
+        ],
+        "13": [
+          "This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFL"
+        ],
+        "14": [
+          "http://scripts.sil.org/OFL"
+        ]
+      },
+      "glyph_count": 695,
+      "cff_sha256": "5375e2349a26adaabf463031506459c6c21a71dcf3b9bb18cff67cfa496ef7a6",
+      "preservation_checks": {
+        "cff_bytes": true,
+        "glyph_order": true,
+        "cmap": true,
+        "metrics": true,
+        "name_and_layout_tables": true
+      }
+    },
+    {
+      "role": "body",
+      "file": "Barlow-Regular.otf",
+      "sha256": "dbff694e7b0e3008bfe31ca500733d9addb04036fac47f1b44577b88a6def97e",
+      "family": "Barlow",
+      "style": "Regular",
+      "weight": 400,
+      "source_id": "2904d763039d78176366e8e32c2c8cebecf2da19e249a7c077cd8c8a736c5cd4:0",
+      "source_sha256": "2904d763039d78176366e8e32c2c8cebecf2da19e249a7c077cd8c8a736c5cd4",
+      "source_urls": [
+        "https://github.com/bekahmcdonald/fonts",
+        "https://github.com/jpt/barlow"
+      ],
+      "source_provenance": {
+        "source_id": "bekah",
+        "path": "Foundries/Tribby Type/Barlow/woff2/Barlow-Regular.woff2",
+        "url": "https://github.com/bekahmcdonald/fonts",
+        "commit": "7841ca896a9a770d5ea18fd5faef0eb91ad90ef3",
+        "upstream_path": "Foundries/Tribby Type/Barlow/woff2/Barlow-Regular.woff2",
+        "container": "woff2"
+      },
+      "license": "SIL Open Font License 1.1",
+      "license_file": "LICENSE.txt",
+      "notice_file": "NOTICE.txt",
+      "sfnt": "OpenType CFF",
+      "preparation": "WOFF2 container decompressed to unflavored OpenType CFF; glyphs/names/metrics/layout untouched",
+      "embedded_notices": {
+        "0": [
+          "Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)"
+        ],
+        "8": [
+          "Tribby Type"
+        ],
+        "9": [
+          "Jeremy Tribby"
+        ],
+        "11": [
+          "https://tribby.com/"
+        ],
+        "13": [
+          "This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFL"
+        ],
+        "14": [
+          "http://scripts.sil.org/OFL"
+        ]
+      },
+      "glyph_count": 695,
+      "cff_sha256": "013084b1d9ccba8cb4521fb1fcdd69fb308702fbb471bf2132c6f81c5d37d305",
+      "preservation_checks": {
+        "cff_bytes": true,
+        "glyph_order": true,
+        "cmap": true,
+        "metrics": true,
+        "name_and_layout_tables": true
+      }
+    }
+  ],
+  "glyph_coverage": [
+    {
+      "role": "heading",
+      "card_definitions_checked": 832,
+      "text_fields": [
+        "name",
+        "faction",
+        "era",
+        "role",
+        "ability_name",
+        "ability_description",
+        "rarity"
+      ],
+      "uppercase_checked": true,
+      "unique_nonspace_codepoints": 80,
+      "missing_codepoints": []
+    },
+    {
+      "role": "body",
+      "card_definitions_checked": 832,
+      "text_fields": [
+        "name",
+        "faction",
+        "era",
+        "role",
+        "ability_name",
+        "ability_description",
+        "rarity"
+      ],
+      "uppercase_checked": true,
+      "unique_nonspace_codepoints": 80,
+      "missing_codepoints": []
+    }
+  ],
+  "license_source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/barlow/OFL.txt",
+  "license_author_verification_url": "https://github.com/jpt/barlow/blob/main/OFL.txt",
+  "license_sha256": "186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f",
+  "notice_sha256": "4d7fe0799706567bcef6f519f1e0dc48ccb036bc71aca82967a6c239138063e4",
+  "authority": "Two explicit local font files only; renderer must verify these prepared hashes and refuse missing faces, never system-font fallback. Decorative glyphs should be drawn paths, not emoji."
+}

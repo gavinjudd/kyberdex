@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "venator-vault"
+version = "0.1.0"
+description = "KyberDex: an open-source Star Wars Discord card bot with collecting, trading, battles and raids"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "NOTICE.md"]
+authors = [{name = "Gavin Judd"}]
+keywords = ["discord", "discord-bot", "star-wars", "card-game", "collectibles", "self-hosted"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Games/Entertainment",
+    "Topic :: Communications :: Chat",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+]
+requires-python = ">=3.13"
+dependencies = [
+    "discord.py==2.7.1",
+    "pillow==12.3.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.1.1", "pytest-asyncio>=1.3,<2", "ruff>=0.14,<1"]
+
+[project.urls]
+Homepage = "https://gavinjudd.github.io/kyberdex/"
+Repository = "https://github.com/gavinjudd/kyberdex"
+Documentation = "https://github.com/gavinjudd/kyberdex#readme"
+Issues = "https://github.com/gavinjudd/kyberdex/issues"
+
+[project.scripts]
+venator-vault = "venator_vault.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/venator_vault"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120

@@ -1,0 +1,37 @@
+[Unit]
+Description=KyberDex Discord card game
+# The user manager has no network-online target; the gateway retries connectivity.
+# A long outage must not leave a permanently exhausted restart allowance.
+StartLimitIntervalSec=0
+
+[Service]
+Type=notify
+NotifyAccess=main
+WorkingDirectory=%h/kyberdex
+EnvironmentFile=%h/.config/venator-vault/service.env
+ExecStartPre=%h/kyberdex/.venv/bin/python %h/kyberdex/deploy/check-clock.py
+ExecStartPre=%h/kyberdex/.venv/bin/python -m venator_vault check --require-art --require-token-file
+ExecStart=%h/kyberdex/.venv/bin/python -m venator_vault run
+Restart=always
+RestartSec=60
+WatchdogSec=120
+WatchdogSignal=SIGTERM
+TimeoutAbortSec=45
+TimeoutStopSec=45
+TimeoutStartSec=300
+KillSignal=SIGTERM
+KillMode=control-group
+SendSIGKILL=yes
+LimitCORE=0
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+RestrictSUIDSGID=yes
+MemoryMax=768M
+MemorySwapMax=0
+CPUQuota=100%
+TasksMax=96
+LimitNOFILE=4096
+
+[Install]
+WantedBy=default.target
