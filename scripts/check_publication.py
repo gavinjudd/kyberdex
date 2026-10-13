@@ -16,7 +16,7 @@ PATTERNS = {
     "Discord token": re.compile(r"[A-Za-z0-9_-]{23,30}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,}"),
     "Discord webhook": re.compile(r"https://(?:canary\.|ptb\.)?discord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9_-]+"),
 }
-PRIVATE_PARTS = {"state", "backups", "work", ".venv", "__pycache__", ".cache"}
+PRIVATE_PARTS = {"state", "backups", "work", ".venv", "__pycache__", ".cache", ".bootstrap"}
 
 def main():
     paths = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
@@ -24,6 +24,7 @@ def main():
     for name in filter(None, paths):
         path = Path(name)
         if (PRIVATE_PARTS.intersection(path.parts)
+                or path.name == ".kyberdex-install"
                 or path.name.startswith(".env") and path.name != ".env.example"
                 or path.suffix in {".sqlite", ".sqlite3", ".db", ".log", ".pem", ".key"}
                 or name.startswith("assets/art/") and path.name != "README.md"):

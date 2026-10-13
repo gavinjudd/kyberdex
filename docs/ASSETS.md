@@ -1,6 +1,6 @@
 # Automatic artwork setup
 
-Install the collection's recorded artwork with one command. Stop an existing bot worker before installing or repairing assets:
+The [guided setup](SETUP.md#one-command-installation) installs artwork automatically. To install or repair only the collection's artwork, stop an existing bot worker and run:
 
 ```bash
 uv run venator-vault setup-art

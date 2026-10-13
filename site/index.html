@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KyberDex — Open-Source Star Wars Discord Card Bot</title>
-  <meta name="description" content="Self-host KyberDex: an open-source Star Wars Discord card bot with 851 definitions, one-command artwork setup, trading, crafting, raids and SQLite persistence.">
+  <meta name="description" content="Self-host KyberDex: an open-source Star Wars Discord card bot with 851 definitions, one-command guided setup, trading, crafting, raids and SQLite persistence.">
   <meta name="theme-color" content="#101518">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="https://gavinjudd.github.io/kyberdex/">
@@ -13,7 +13,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="KyberDex">
   <meta property="og:title" content="KyberDex — Open-Source Star Wars Discord Card Bot">
-  <meta property="og:description" content="851 card definitions. Collect, trade, craft and battle. Explore the Python + SQLite engine and self-host your own Discord community game.">
+  <meta property="og:description" content="Self-host a Star Wars Discord card bot with one-command guided setup, automatic artwork, 851 card definitions, trading, crafting and battles.">
   <meta property="og:url" content="https://gavinjudd.github.io/kyberdex/">
   <meta property="og:image" content="https://gavinjudd.github.io/kyberdex/social.png">
   <meta property="og:image:width" content="1200">
@@ -21,14 +21,14 @@
   <meta property="og:image:alt" content="KyberDex. Open-source Discord card collection bot. Python, SQLite, 851 card definitions.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="KyberDex — Open-Source Star Wars Discord Card Bot">
-  <meta name="twitter:description" content="Collect, trade, craft and battle. A self-hosted Python Discord game with 851 Star Wars card definitions and a transactional SQLite engine.">
+  <meta name="twitter:description" content="One-command setup for your own Star Wars Discord card bot. Automatic artwork, 851 card definitions, trading, crafting and battles. Free MIT-licensed code.">
   <meta name="twitter:image" content="https://gavinjudd.github.io/kyberdex/social.png">
   <meta name="twitter:image:alt" content="KyberDex: open-source Discord card collection bot.">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"KyberDex","description":"An open-source, self-hosted Discord card collection game with 851 Star Wars card definitions, trading, crafting, separate Ground and Fleet battles, cooperative raids and a transactional SQLite engine.","url":"https://gavinjudd.github.io/kyberdex/","codeRepository":"https://github.com/gavinjudd/kyberdex","programmingLanguage":"Python","runtimePlatform":"Python 3.13+ on Linux or macOS","license":"https://github.com/gavinjudd/kyberdex/blob/main/LICENSE","author":{"@type":"Person","name":"Gavin Judd","url":"https://github.com/gavinjudd"},"keywords":["Discord bot","card collection game","Python","SQLite","self-hosted","open source","Star Wars"]}
+  {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"KyberDex","description":"An open-source Star Wars Discord card bot with one-command guided setup, automatic artwork installation, 851 card definitions, trading, crafting, Ground and Fleet battles, cooperative raids and SQLite persistence.","url":"https://gavinjudd.github.io/kyberdex/","codeRepository":"https://github.com/gavinjudd/kyberdex","programmingLanguage":"Python","version":"0.3.0","runtimePlatform":"Python 3.13+ on Linux or macOS","license":"https://github.com/gavinjudd/kyberdex/blob/main/LICENSE","author":{"@type":"Person","name":"Gavin Judd","url":"https://github.com/gavinjudd"},"keywords":["Discord bot","card collection game","Python","SQLite","self-hosted","open source","Star Wars"]}
   </script>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can I run KyberDex immediately after cloning it?","acceptedAnswer":{"@type":"Answer","text":"You can run offline tests and browse the catalog immediately. Run setup-art to download and install the recorded artwork locally, then configure your own Discord bot and pass strict readiness checks. Image files stay out of Git."}},{"@type":"Question","name":"Is KyberDex free and open source?","acceptedAnswer":{"@type":"Answer","text":"The original software is MIT licensed. You host and operate your own instance. Third-party fonts have their own notices; the code license does not grant rights to Star Wars characters, trademarks or third-party artwork."}},{"@type":"Question","name":"Does KyberDex use paid card packs?","acceptedAnswer":{"@type":"Answer","text":"No. The game has free daily credits, captures, a credit-based market and crafting. It has no real-money purchases, paid randomness or card wagers."}},{"@type":"Question","name":"Can one deployment serve many Discord servers?","acceptedAnswer":{"@type":"Answer","text":"The current release is designed for one configured guild and one active game worker. It is not a multi-tenant hosted bot platform."}}]}
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does the one-command installer do?","acceptedAnswer":{"@type":"Answer","text":"The installer prepares the local tools and KyberDex, then opens a guided setup for your bot token, server and channels. It installs artwork, checks readiness and offers to start the bot. You still create the Discord bot and authorize its server invite in your browser."}},{"@type":"Question","name":"Is KyberDex free and open source?","acceptedAnswer":{"@type":"Answer","text":"The original software is MIT licensed. You host and operate your own instance. Third-party fonts have their own notices; the code license does not grant rights to Star Wars characters, trademarks or third-party artwork."}},{"@type":"Question","name":"Does KyberDex use paid card packs?","acceptedAnswer":{"@type":"Answer","text":"No. The game has free daily credits, captures, a credit-based market and crafting. It has no real-money purchases, paid randomness or card wagers."}},{"@type":"Question","name":"Can one deployment serve many Discord servers?","acceptedAnswer":{"@type":"Answer","text":"The current release is designed for one configured guild and one active game worker. It is not a multi-tenant hosted bot platform."}}]}
   </script>
 </head>
 <body>
@@ -62,7 +62,7 @@
           <p class="panel-foot">Tier-first draws. Explicit release windows.<br>Lifetime supply caps. Inspectable rules.</p>
         </aside>
       </section>
-      <div class="asset-notice"><span class="notice-label">BEFORE YOU START</span><p>Clone the code, then run <code>uv run venator-vault setup-art</code> to install the recorded artwork locally. No manual image hunt. <a href="https://github.com/gavinjudd/kyberdex/blob/main/docs/ASSETS.md">Artwork setup and source notices <span aria-hidden="true">↗</span></a></p></div>
+      <div class="asset-notice"><span class="notice-label">BEFORE YOU START</span><p>One terminal command prepares KyberDex, then guides you through Discord configuration, channel selection, artwork and startup. <a href="#start">Start the guided setup <span aria-hidden="true">↗</span></a></p></div>
       <section id="game" class="section" aria-labelledby="game-title">
         <div class="section-heading"><p class="eyebrow">01 / THE GAME</p><h2 id="game-title">More than a collection counter.</h2><p>A full community game loop, with deliberate protections around the cards people earn.</p></div>
         <div class="feature-list">
@@ -106,25 +106,16 @@
         </tbody></table></div>
       </section>
       <section id="start" class="section start-section" aria-labelledby="start-title">
-        <div class="section-heading"><p class="eyebrow">04 / GET STARTED</p><h2 id="start-title">Fork it. Read it. Run it.</h2><p>Explore the engine, install the artwork with one command and configure your own Discord bot to host gameplay.</p></div>
+        <div class="section-heading"><p class="eyebrow">04 / GET STARTED</p><h2 id="start-title">One command. A guided setup.</h2><p>Install into <code>~/kyberdex</code> on your computer or server. The wizard handles local tools, configuration, artwork and readiness.</p></div>
         <div class="start-grid">
-          <div class="terminal"><div class="terminal-head"><span>LOCAL SETUP</span><span>LINUX / macOS</span></div><pre><code><span class="code-comment"># Python 3.13+ and uv</span>
-git clone https://github.com/gavinjudd/kyberdex.git
-cd kyberdex
-uv sync --locked
-uv run venator-vault setup-art
-uv run venator-vault check --require-art
-
-<span class="code-comment"># Browse the catalog without Discord</span>
-uv run python -m venator_vault.web \
-  --root . --host 127.0.0.1 --port 8765</code></pre><p>Artwork setup is cached and resumable. Images stay local; the downloader does not grant a reuse license. Keep the checkout for its catalog, assets and web files.</p></div>
-          <div class="start-notes"><h3>Your server. Your deployment.</h3><p>The current release targets one configured Discord guild and one active worker. It is source you operate—not a hosted bot invitation.</p><ol><li>Install and verify the offline code.</li><li>Configure your own guild and protected bot token.</li><li>Run <code>setup-art</code> to install the recorded artwork.</li><li>Pass strict readiness checks, then start your bot.</li></ol><a class="button primary" href="https://github.com/gavinjudd/kyberdex/blob/main/docs/SETUP.md">Read the self-hosting guide <span aria-hidden="true">↗</span></a></div>
+          <div class="terminal"><div class="terminal-head"><span>INSTALL KYBERDEX</span><span>LINUX / macOS / WSL</span></div><pre class="install-command"><code>curl -fsSL https://raw.githubusercontent.com/gavinjudd/kyberdex/main/install.sh | sh</code></pre><p>Installs uv and Python when needed. No sudo or shell-profile changes. The first artwork download is about 175 MB; retries reuse the cache.</p><p><a href="https://github.com/gavinjudd/kyberdex/blob/main/install.sh">Read the installer</a> · <a href="https://github.com/gavinjudd/kyberdex/blob/main/docs/SETUP.md#manual-setup-advanced">Manual setup</a></p></div>
+          <div class="start-notes"><h3>Your bot. Your server.</h3><p>Discord requires you to create a bot and authorize its server invite in your browser. The wizard points you to those steps, then continues locally.</p><ol><li>Enter your bot token in the hidden local prompt.</li><li>Choose your server and public text channels.</li><li>Let artwork setup and readiness checks finish.</li><li>Start the bot in the foreground when prompted.</li></ol><p class="setup-note">Keep the terminal open while it runs; Ctrl+C stops it. Restart with <code>cd ~/kyberdex &amp;&amp; ./start.sh</code>. One guild per deployment.</p><a class="button primary" href="https://github.com/gavinjudd/kyberdex/blob/main/docs/SETUP.md">Read the setup guide <span aria-hidden="true">↗</span></a></div>
         </div>
       </section>
       <section class="section faq-section" aria-labelledby="faq-title">
         <div class="section-heading"><p class="eyebrow">05 / GOOD TO KNOW</p><h2 id="faq-title">A few things, up front.</h2></div>
         <div class="faq-list">
-          <details open><summary>Can I run KyberDex immediately after cloning it?</summary><p>You can run offline tests and browse the catalog immediately. Run setup-art to download and install the recorded artwork locally, then configure your own Discord bot and pass strict readiness checks. Image files stay out of Git. <a href="https://github.com/gavinjudd/kyberdex/blob/main/docs/ASSETS.md">Read the artwork setup guide.</a></p></details>
+          <details open><summary>What does the one-command installer do?</summary><p>The installer prepares the local tools and KyberDex, then opens a guided setup for your bot token, server and channels. It installs artwork, checks readiness and offers to start the bot. You still create the Discord bot and authorize its server invite in your browser. <a href="https://github.com/gavinjudd/kyberdex/blob/main/docs/SETUP.md">Read the setup guide.</a></p></details>
           <details><summary>Is KyberDex free and open source?</summary><p>The original software is MIT licensed. You host and operate your own instance. Third-party fonts have their own notices; the code license does not grant rights to Star Wars characters, trademarks or third-party artwork. <a href="https://github.com/gavinjudd/kyberdex/blob/main/NOTICE.md">Read the licensing boundaries.</a></p></details>
           <details><summary>Does KyberDex use paid card packs?</summary><p>No. The game has free daily credits, captures, a credit-based market and crafting. It has no real-money purchases, paid randomness or card wagers.</p></details>
           <details><summary>Can one deployment serve many Discord servers?</summary><p>The current release is designed for one configured guild and one active game worker. It is not a multi-tenant hosted bot platform. <a href="https://github.com/gavinjudd/kyberdex/blob/main/docs/ARCHITECTURE.md">See the operating limits.</a></p></details>

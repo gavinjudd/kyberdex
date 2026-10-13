@@ -554,6 +554,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="KyberDex bot and operations")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("run", help="Connect the dedicated bot to Discord")
+    setup = commands.add_parser("setup", help="Interactive token, server, channel and artwork setup")
+    setup.add_argument("--no-start", action="store_true", help="Save and verify setup without offering to start")
     art = commands.add_parser("setup-art", help="Download pinned artwork sources and reproduce reviewed images")
     art.add_argument("--sources", type=Path, help="Recipe registry (default: data/art-sources.json)")
     art.add_argument("--workers", type=int, default=4, help="Concurrent downloads/transforms, 1–4 (default: 4)")
@@ -572,6 +574,13 @@ def main(argv=None):
     os.umask(0o077)
     try:
         settings = Settings.from_env()
+        if args.command == "setup":
+            from .setup import run_setup
+            with worker_lock(settings):
+                result = run_setup(settings, no_start=args.no_start)
+            if result["start"]:
+                return main(["run"])
+            return 0 if result["ready"] else 1
         if args.command == "setup-art":
             from .art_setup import setup_art
             with worker_lock(settings):
@@ -608,6 +617,9 @@ def main(argv=None):
 
                 bot = VaultBot(settings)
                 bot.run(settings.read_token(), log_level=logging.INFO)
+    except (EOFError, KeyboardInterrupt):
+        print("Setup interrupted; completed downloads and previously saved settings are preserved.", file=sys.stderr)
+        return 1
     except (ValueError, OSError, sqlite3.Error) as error:
         print(str(error), file=sys.stderr)
         return 1

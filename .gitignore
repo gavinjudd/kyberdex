@@ -30,3 +30,7 @@ bot-token
 *.key
 *.p12
 *.pfx
+
+# Local bootstrap runtime and install marker
+.bootstrap/
+.kyberdex-install

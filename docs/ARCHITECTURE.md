@@ -1,6 +1,6 @@
 # Architecture and operating limits
 
-KyberDex separates Discord interactions, transactional game rules, persistent scheduling and a read-only web catalog. It is a Python 3.13+ application using discord.py, SQLite and Pillow, deployed from a source checkout.
+KyberDex separates Discord interactions, transactional game rules, persistent scheduling and a read-only web catalog. It is a Python 3.13+ application using discord.py, SQLite and Pillow. The one-command installer prepares the source checkout and runs an interactive setup wizard; advanced users can manage the checkout directly.
 
 ## Modules
 
@@ -41,7 +41,7 @@ Automatic activity credit uses message metadata without reading or storing ordin
 
 - **One configured guild and one active game worker.** This release is not a multi-tenant hosted bot platform.
 - **Linux/macOS operations.** POSIX locks and filesystem permission checks are part of the CLI. Linux systemd examples are supplied separately.
-- **Checkout-based runtime.** A wheel alone does not contain the full catalog, fonts, finishes and web UI.
+- **Checkout-based runtime.** The installer prepares the checkout. A wheel alone does not contain the full catalog, fonts, finishes and web UI.
 - **Local durable storage.** Keep databases on a reliable filesystem. SQLite is not a distributed storage or active-active replication design.
 - **Local artwork setup.** `setup-art` fetches recorded sources and installs assets that reproduce the expected reviewed pixels. Images remain outside Git. Live encounters require successful strict readiness and explicit Discord configuration.
 - **Small public catalog server.** The built-in HTTP server is not a general application hosting or authentication layer.

@@ -46,3 +46,9 @@ def synthetic_asset_root(tmp_path_factory):
         }
     (art_root / 'manifest.json').write_text(json.dumps({'assets': manifest}))
     return root
+
+
+@pytest.fixture(autouse=True)
+def isolated_saved_setup(monkeypatch, tmp_path):
+    """Never let a developer's real onboarding profile affect offline tests."""
+    monkeypatch.setenv('XDG_CONFIG_HOME', str(tmp_path.parent / (tmp_path.name + '-config')))
