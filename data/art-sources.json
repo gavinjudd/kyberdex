@@ -9,6 +9,7 @@
     "lumiere-a.akamaihd.net",
     "media.contentapi.ea.com",
     "shared.akamai.steamstatic.com",
+    "static.wikia.nocookie.net",
     "web.archive.org",
     "www.swtor.com"
   ],
@@ -1521,35 +1522,54 @@
     "rey": {
       "path": "assets/art/rey.png",
       "subject_id": "rey",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/rey",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/rey-training_1be2486c.jpeg?region=0%2C0%2C1280%2C536",
-      "source_raw_sha256": "2cda3add7bfeb147c4259fa58de5e74d3bafa2dfc058547ebb94db74ea25b6fc",
-      "pixel_sha256": "ac16b94a9a4b4d0fb2a4240b585834ba8e144d8774130d99a6e19af9feb1ff65",
-      "reviewed_sha256": "9644662ced208b45cf9134fe939d1ee3c7703d7c83977cfd817233dd9afc52e2",
+      "source_page_url": "https://starwars.fandom.com/wiki/Rey_Skywalker",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/2/2b/Rey_TROS_Fathead.png/revision/latest",
+      "source_raw_sha256": "cebb6774b344c5d295d1667233e9db0849ec59abb3ca4eaa32b088c41807668b",
+      "pixel_sha256": "07ff39b708977ec1cb389d94362ac7d35cbba330d5a9b770e2616fb9a2a278a0",
+      "reviewed_sha256": "3dd35776d2ea38acbaa3a399a1c0dfb7547a6a4a35a7ba62d8bb06b75d2b8073",
       "normalization": {
         "crop_center": [
           0.5,
           0.5
         ],
-        "fit_mode": "cover",
+        "fit_mode": "contain",
         "output_size": [
           1024,
           1536
         ],
-        "placement": null,
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            709,
+            1180
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
         "requested_crop_box": [
-          461,
-          27,
-          755,
-          525
+          0,
+          0,
+          835,
+          1390
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "kylo-ren": {
       "path": "assets/art/kylo-ren.png",
@@ -3267,46 +3287,54 @@
     "autovalet-droid": {
       "path": "assets/art/autovalet-droid.png",
       "subject_id": "autovalet-droid",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/autovalet-droid",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/tlj-db-first-order-autovalet-droid-main-image_24d05254.jpeg?region=0%2C0%2C768%2C432",
-      "source_raw_sha256": "0537bb21e3465bd515a3bdcac76fec170d34ace70ce5f63f81a09dd0bae9cc1d",
-      "pixel_sha256": "7d79d64a9ff18c89519be3ce28d9ccc5b0af525c1c3ed4baf478fc2b391ca27b",
-      "reviewed_sha256": "30aff5c46ce3ab97d7e994ed8922e1feab2cfcf08da8de7b2f9ad21317f159e4",
+      "source_page_url": "https://starwars.fandom.com/wiki/SO-1P_autovalet_droid",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/9/96/S0-1P-TLJVD.png/revision/latest",
+      "source_raw_sha256": "6132452fcccdb984c79e64d64e75966bd730762e0bd90ad91f2ea1d661694448",
+      "pixel_sha256": "dd2a3d0f2e12c71c29a230aba898675ab074dcde306106131614928082868301",
+      "reviewed_sha256": "f944f722f12ee55441f98b3618eb485e5b8a7e38f30d14fe29e84e5cdcafc057",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          768,
-          432
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          533
-        ],
-        "placement_xy": [
-          38,
-          391
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            1075
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          600,
+          630
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "b1-series-rocket-battle-droid": {
       "path": "assets/art/b1-series-rocket-battle-droid.png",
@@ -3652,46 +3680,54 @@
     "droideka": {
       "path": "assets/art/droideka.png",
       "subject_id": "droideka",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/droideka",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_droideka_01_169_48a22970.jpeg?region=0%2C0%2C1560%2C878",
-      "source_raw_sha256": "522de3c443705c4d99fcb14f0c30a513fb346b1cb77635d1befd107128f92940",
-      "pixel_sha256": "5bcc60f493641f65b3fd4f5531bb05c6839b3a76bfac4415377675323a2d61dc",
-      "reviewed_sha256": "ec00c3a4d2c8b30f56b473a5e53df27ff4d942bcb4a1e2a6b0878dfd336d3650",
+      "source_page_url": "https://starwars.fandom.com/wiki/Droideka",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/9/9d/Droideka-SWE.png/revision/latest",
+      "source_raw_sha256": "0a7898f6037b1f4cbfa5376a032ce168a42ffb7d45faaeadb1e46448035a293e",
+      "pixel_sha256": "b97658e2b4ad85d25931bca8fff384f40a9fe740a98c397f1241360dcc3e6c6e",
+      "reviewed_sha256": "1a372701a64185a2d805bd03d10efe75da075350945a4e271a8e9ed06767414d",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1560,
-          878
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          534
-        ],
-        "placement_xy": [
-          38,
-          390
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            1092
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          900,
+          960
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "dwarf-spider-droid": {
       "path": "assets/art/dwarf-spider-droid.png",
@@ -3872,46 +3908,54 @@
     "fire-breather": {
       "path": "assets/art/fire-breather.png",
       "subject_id": "fire-breather",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/fire-breather",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_firebreather_01_169_f5aeda4d.jpeg?region=0%2C0%2C1560%2C878",
-      "source_raw_sha256": "b95c566989e906c8295db0ac852022635a2135baee3e6e69794b3e9e975e8649",
-      "pixel_sha256": "64ecf68a2b568435fbf326471dc62728b6aa73d3806c35642e0b4d9ac6834cfc",
-      "reviewed_sha256": "33db22ddbda240c55540840eace9f7de36d872ada7bc66274c125ac6501f7f02",
+      "source_page_url": "https://starwars.fandom.com/wiki/Refuse_incinerator_droid",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/5/57/Firebreather_relationship.png/revision/latest",
+      "source_raw_sha256": "731815eb5f6eb7115b982def390ee39d6b40bfad45067c030b8b8ad9f7a36157",
+      "pixel_sha256": "ef72aa05380527c010ab76cab7885e06c3a293cdcadcec7797eb28c36f215ce8",
+      "reviewed_sha256": "1eee9642c49aa924357cfe0070c1eaa587cae1f5b057d6c5fd1a39fbb02d2779",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1560,
-          878
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          534
-        ],
-        "placement_xy": [
-          38,
-          390
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            819
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          800,
+          640
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "first-order-interrogator-droid": {
       "path": "assets/art/first-order-interrogator-droid.png",
@@ -3960,46 +4004,54 @@
     "first-order-medical-droid": {
       "path": "assets/art/first-order-medical-droid.png",
       "subject_id": "first-order-medical-droid",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/first-order-medical-droid",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/tlj-db-first-order-medical-droid-main-image_8f24ef51.jpeg?region=0%2C1%2C481%2C271",
-      "source_raw_sha256": "fc46691708af706182e55bf5488d9bf05f854e3a670eddb689f707f85da4aa29",
-      "pixel_sha256": "294d53d670c5de63545af4f478044331d6eba17c706e2463ca8e3f74799b2d53",
-      "reviewed_sha256": "881a8633077aea6d4a8d526b51367aa0f2a03fd4d4ecfa84d9db75af4ebcb498",
+      "source_page_url": "https://starwars.fandom.com/wiki/IT-S00.2_medical_droid",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/e/ed/IT-S00.2_medical_droid.png/revision/latest",
+      "source_raw_sha256": "81da7fec99f257ca7bc933cd3b4823e77cfae90adef35f323285450acb6e5dc9",
+      "pixel_sha256": "bc90499b7d6dffb14969acdd6fe1722ef2fe9503552ebf04f55996c7322c9ed7",
+      "reviewed_sha256": "5137d7f67fb6e0b279e879d2375203ee1572c3d9e370be910b60b1269970e2be",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          207,
-          271
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          488,
-          639
-        ],
-        "placement_xy": [
-          268,
-          338
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            493
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          1080,
+          520
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "first-order-probe-droid": {
       "path": "assets/art/first-order-probe-droid.png",
@@ -5313,46 +5365,49 @@
     "transport-ticketing-droid": {
       "path": "assets/art/transport-ticketing-droid.png",
       "subject_id": "transport-ticketing-droid",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/transport-ticketing-droid",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/transport-ticketing-droid-main_ae4c3c92.jpeg?region=0%2C0%2C1920%2C1080",
-      "source_raw_sha256": "3390fa6fd3b7b93594c5b358bff380c20104aa282a439e855001eb1cee265d38",
-      "pixel_sha256": "ae0700d905485dbdf95cd5dd56f109eaa4295c22f5f2e99e16288729993a23b0",
-      "reviewed_sha256": "ac16ab702b474964f1a6eb37aa72d1ca833015ef72a386921c722390d6eeffee",
+      "source_page_url": "https://starwars.fandom.com/wiki/Transport_ticketing_droid",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/6/62/TransportTicketingDroid-TheFirstOrderOccupation.jpg/revision/latest",
+      "source_raw_sha256": "a2c5c1f63d5c78c3f40b1e9ddc5812578fb04c79246468cd99db177d60bdb730",
+      "pixel_sha256": "556258b6aff04a2625d24866c8a4db240a9094f8321745c35868fa773b6d49e6",
+      "reviewed_sha256": "9b6840daab0b6dce4a33459e2b667e1e622ffa5ea6b88f5d1382d326670c7ce5",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1920,
-          1080
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          533
-        ],
-        "placement_xy": [
-          38,
-          391
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            882
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          250,
+          20,
+          610,
+          330
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "t-series-tactical-droid": {
       "path": "assets/art/t-series-tactical-droid.png",
@@ -7101,35 +7156,54 @@
     "kitster": {
       "path": "assets/art/kitster.png",
       "subject_id": "kitster",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/kitster",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/kitster_1928585a.jpeg?region=16%2C119%2C1955%2C1099",
-      "source_raw_sha256": "54ec5a58864a9bc7412162d37be20c8434d7314226f130b59d26fa8d2692492f",
-      "pixel_sha256": "07c898b81251d38f4bf4e08059ba978eb067ad571099e1db550ebade2e1128f7",
-      "reviewed_sha256": "3d7f90d2f7cc9ef8268d57b5abc1fb1629b43026c6d0c9807ae3055a394518b0",
+      "source_page_url": "https://starwars.fandom.com/wiki/Kitster_Banai",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/a/a1/Kitster.png/revision/latest",
+      "source_raw_sha256": "cb5c2b0524952905fb0c0e69bb3ef8a79fbbfeabbd54c9bcfd43403580278e85",
+      "pixel_sha256": "091b9c3b3a6f9f3cfc50e70100278660c9b5d1cce8ab5af402a7ddb607c49e29",
+      "reviewed_sha256": "bb1425e433e75cdcedc7c6cb4ca3ef3e741943a21ce721f34e2f21298576f2dc",
       "normalization": {
         "crop_center": [
-          0.51599,
+          0.5,
           0.5
         ],
-        "fit_mode": "cover",
+        "fit_mode": "contain",
         "output_size": [
           1024,
           1536
         ],
-        "placement": null,
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            889,
+            1180
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
         "requested_crop_box": [
           0,
           0,
-          1955,
-          1099
+          1010,
+          1340
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "r4-p17": {
       "path": "assets/art/r4-p17.png",
@@ -17674,35 +17748,54 @@
     "queen-karina-the-great": {
       "path": "assets/art/queen-karina-the-great.png",
       "subject_id": "queen-karina-the-great",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/queen-karina-the-great",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/acw_ia_36328_f1be4447.jpeg?region=241%2C0%2C1438%2C809",
-      "source_raw_sha256": "9b0ce6c8ab7e6f6e6cf11fccb4a487ec4dc8fe3df95f160e395af17644436b58",
-      "pixel_sha256": "d69ef8fde0658e6642cc580ced03ff368c5f6a996dbaa98ef60dce95adf59487",
-      "reviewed_sha256": "102e046fdbc95c767a480a5af47f9d73f3a6afbee500b1b0fd6afd6cc4fee51e",
+      "source_page_url": "https://starwars.fandom.com/wiki/Karina_the_Great",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/d/d7/Karina-SWE.png/revision/latest",
+      "source_raw_sha256": "8350e84c24058b9f4ba7f1908488031aadf08c51d1809ade734c615d3cec9752",
+      "pixel_sha256": "a5d109df6c68a0fb3e84fe8e2a6ff46ed787df672686ae4ba0c128d35b464fb3",
+      "reviewed_sha256": "feb226bccf8e9900ba5a6ee91377ac94a32a41e737c59eed8796e80848ec61ac",
       "normalization": {
         "crop_center": [
           0.5,
           0.5
         ],
-        "fit_mode": "cover",
+        "fit_mode": "contain",
         "output_size": [
           1024,
           1536
         ],
-        "placement": null,
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            866,
+            1180
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
         "requested_crop_box": [
-          144,
           0,
-          1366,
-          809
+          0,
+          635,
+          865
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "admiral-griss": {
       "path": "assets/art/admiral-griss.png",
@@ -18545,14 +18638,16 @@
     "gungi": {
       "path": "assets/art/gungi.png",
       "subject_id": "gungi",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/news/teaching-with-star-wars-the-gathering",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/image_b6069b7e.jpeg",
-      "source_raw_sha256": "b60202c1b1e85bef44dbd7b22177b4dcc8e845ae836470da750a142c2a5ad997",
-      "pixel_sha256": "baaa628c72c6c2dc67e73522eb2092d23df1236ed095457fb830e1edd0fad873",
-      "reviewed_sha256": "4aae8cbcba2275de9c813d9d2d7152def1f889a0307ffae2be7a49f0c19a8b8f",
+      "source_page_url": "https://starwars.fandom.com/wiki/Gungi",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/9/9a/Gungi-SWE.png/revision/latest",
+      "source_raw_sha256": "e3dc63cc55d4052e660be5880ae210c704a40288868fb29b8355ff12480970cd",
+      "pixel_sha256": "c2b1a65a2bc09baa83e6a6366f9d4cd0fa9b5ff99c5f3ba32ff87d93264129f6",
+      "reviewed_sha256": "45c88bb9e1c6f21162f455e17e6285f0b5bca1a62d551861c495b102411b9b14",
       "normalization": {
         "crop_center": [
           0.5,
@@ -18566,11 +18661,11 @@
         "placement": {
           "xy": [
             0,
-            100
+            0
           ],
           "size": [
             1024,
-            1108
+            1076
           ],
           "matte_rgb": [
             4,
@@ -18579,15 +18674,18 @@
           ]
         },
         "requested_crop_box": [
-          150,
           0,
-          650,
-          541
+          0,
+          690,
+          725
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "po-nudo": {
       "path": "assets/art/po-nudo.png",
@@ -20968,35 +21066,54 @@
     "oppo-rancisis": {
       "path": "assets/art/oppo-rancisis.png",
       "subject_id": "oppo-rancisis",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/oppo-rancisis",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/oppo-rancisis-edited_c22ddc63.jpeg?region=0%2C0%2C1920%2C1082",
-      "source_raw_sha256": "f6d5b4619bbf8ba72883ca65a8ffe0151a33a5a78c4bb629031f3892b545ab69",
-      "pixel_sha256": "4f6b79219abaf9438868fdf36985bcd6e35ce8a986ca9f55ee4ffb6c904b1200",
-      "reviewed_sha256": "64874d5a6907328bd435e2a0e60fd2eef8dc073c3d15de11a24baf8b4a7c4b63",
+      "source_page_url": "https://starwars.fandom.com/wiki/Oppo_Rancisis",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/7/70/OppoRancisis-2026ToppsChromeSW.png/revision/latest",
+      "source_raw_sha256": "56696d60bb4222a118c90eb686d3f35555b53bafe587cf760b2f5f7c26316df0",
+      "pixel_sha256": "f02f92fe9147954c4c1766a0bef7c5c3420c456d7965b5c34a67384455bfd5a1",
+      "reviewed_sha256": "2cd61d89fbe3d28d051b01b3ea812d28f7bb98e722524165c5337e045d9a7a3f",
       "normalization": {
         "crop_center": [
           0.5,
           0.5
         ],
-        "fit_mode": "cover",
+        "fit_mode": "contain",
         "output_size": [
           1024,
           1536
         ],
-        "placement": null,
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            996,
+            1180
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
         "requested_crop_box": [
           0,
           0,
-          1920,
-          1082
+          624,
+          739
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "osi-sobeck": {
       "path": "assets/art/osi-sobeck.png",
@@ -22793,46 +22910,49 @@
     "kylo-ren-s-command-shuttle": {
       "path": "assets/art/kylo-ren-s-command-shuttle.png",
       "subject_id": "kylo-ren-s-command-shuttle",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/kylo-rens-command-shuttle",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/kylo-ren_s-command-shuttle_0b43b874.jpeg?region=95%2C0%2C1557%2C878",
-      "source_raw_sha256": "83c451613aeff67f495f153ee6a1190cddd187bc9c04f027ac72f4b4aa22118a",
-      "pixel_sha256": "8f37b8cbb76a495fa2367af35b8ab93326c2ea098f15ce27630cc79e4331fc14",
-      "reviewed_sha256": "24ddcc3470cf57d61fe5fba3491eb821c4240701e3243dbd1eeb1b7080083a62",
+      "source_page_url": "https://starwars.fandom.com/wiki/Upsilon-class_command_shuttle",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/c/c9/Upsilon-class_Shuttle_Expansion_Pack_box_art.png/revision/latest",
+      "source_raw_sha256": "5fcf4a1361ecbe93f30659ab738dbc3cf7ba89af0582521c1abad638322155eb",
+      "pixel_sha256": "b09fbfad7da320decac81249e0cc99ae1251d40670452f3bad6cd41ed7126cc5",
+      "reviewed_sha256": "a07ced617bdbb2fa67939392b9565ab3131c0898bfe7274ec9a8a487956671cc",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1557,
-          878
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          535
-        ],
-        "placement_xy": [
-          38,
-          390
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            820
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          1920,
+          1537
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "darth-vader-s-tie-fighter": {
       "path": "assets/art/darth-vader-s-tie-fighter.png",
@@ -23145,46 +23265,49 @@
     "umbaran-hover-tank": {
       "path": "assets/art/umbaran-hover-tank.png",
       "subject_id": "umbaran-hover-tank",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/umbaran-hover-tank",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/umbaran_hover_tank_9e088750.jpeg?region=246%2C0%2C1428%2C803",
-      "source_raw_sha256": "d0f7d0cc58b621e3a6e02d70a04cf107d042ab59fdcb0204c4302ab468ae4712",
-      "pixel_sha256": "19be5fd7c2f59c303b8d016543a3679714ce83f95b706b94de1388b352dbeb85",
-      "reviewed_sha256": "6c1ba446b7934434a0460efa5b9d0bc6571848086a5f3f1e8ff3e8b948f7fb40",
+      "source_page_url": "https://starwars.fandom.com/wiki/Umbaran_hover_tank",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/d/d0/UmbaranHoverTank-SWE.jpg/revision/latest",
+      "source_raw_sha256": "eab0069a1dce627e9ef8332b97c617db08157c9f55e81921a82b63426e8b6661",
+      "pixel_sha256": "13a36621424bbc1548d150f4c5f279d652e1f37f34bf306fdce3d54e881820c8",
+      "reviewed_sha256": "bf14f897c0cb2d6de7e8a9fb9ce2e3eb73e6d4922013cae66527fb87d05e8a13",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1428,
-          803
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          533
-        ],
-        "placement_xy": [
-          38,
-          391
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            642
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          944,
+          592
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "alderaan-cruiser": {
       "path": "assets/art/alderaan-cruiser.png",
@@ -25495,46 +25618,49 @@
     "orn-free-taa-s-shuttle": {
       "path": "assets/art/orn-free-taa-s-shuttle.png",
       "subject_id": "orn-free-taa-s-shuttle",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/orn-free-taa-s-shuttle",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/orn-free-taa-s-shuttle-main_cb1d6bea.jpeg?region=158%2C0%2C964%2C542",
-      "source_raw_sha256": "a1fb538d092182b0980517a45997855eab1699a11f76331707389b1a4c998934",
-      "pixel_sha256": "3b5bcfac3ddc80677ba850b391f71a2d877bf5d0714d582de13c5edb0635763c",
-      "reviewed_sha256": "f5d642acab0c704a24f18e973296a1215689b83c60a283cc1a81e2e7850689cb",
+      "source_page_url": "https://starwars.fandom.com/wiki/Orn_Free_Taa%27s_shuttle",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/b/bd/Orn_Free_Taa_Shuttle.png/revision/latest",
+      "source_raw_sha256": "6c935066ceca25302de106b954f72e0d06da77c477c522da36fff17d5948c456",
+      "pixel_sha256": "099ad37ea9078f8c64396a406e466a967b670b45aa257e7c1baad041ef580e7d",
+      "reviewed_sha256": "584a6a3ed17e258dfc30afa29edf4ab1920bfb0ed9f59473e1cc0a272a5f025d",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          964,
-          542
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          533
-        ],
-        "placement_xy": [
-          38,
-          391
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            598
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          100,
+          40,
+          1230,
+          700
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "outer-rim-speeder-bike": {
       "path": "assets/art/outer-rim-speeder-bike.png",
@@ -26032,46 +26158,54 @@
     "tie-dagger": {
       "path": "assets/art/tie-dagger.png",
       "subject_id": "tie-dagger",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/tie-dagger",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/tie-dagger-main_240a463b.jpeg?region=164%2C0%2C953%2C536",
-      "source_raw_sha256": "1ca9ed2c7d384e21a3ac48ad94ef2f6164eaa279b6fc2284741dfc27d13dd574",
-      "pixel_sha256": "477679028d43701832e194fd35bc4c6ccb4d20473bd8c022c360bfb1c7779930",
-      "reviewed_sha256": "ce6c8edd7adf1700b3a94394d57dcdd278b99853b55ce8eae1e6d59d7773a8d3",
+      "source_page_url": "https://starwars.fandom.com/wiki/TIE/dg_starfighter",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/2/2e/TIEDagger-DB.png/revision/latest",
+      "source_raw_sha256": "43b935fb68fc6750b95d5c2fe777897ade0a99def7520f956fb2b40d85e4d504",
+      "pixel_sha256": "beb38e9202f20f516e5a5eeb611df778d049ad3a4eccd50a7ce92768da2fb997",
+      "reviewed_sha256": "aa367a8dfe02def2e0ad52cc45dabb6a2ac7d5e1682e50fe26e79f6f719d940f",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          953,
-          536
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          533
-        ],
-        "placement_xy": [
-          38,
-          391
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            746
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          670,
+          488
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "tie-striker": {
       "path": "assets/art/tie-striker.png",
@@ -28159,46 +28293,49 @@
     "trident-drill-assault-craft": {
       "path": "assets/art/trident-drill-assault-craft.png",
       "subject_id": "trident-drill-assault-craft",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/trident-drill-assault-craft",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_tridentdrillassaultcraft_01_169_694b0b6d.jpeg?region=0%2C0%2C1560%2C878",
-      "source_raw_sha256": "88fe71a67709b72c6a662cfd13ab1c7581ff90085edc64b5ead97bc8710a268f",
-      "pixel_sha256": "a2101abd4530c3ad3fbea07c6fde8de7b8a390c2dc48fb9ab407d3eaeb620a44",
-      "reviewed_sha256": "010bcf86a8155e9bd8ae8a8765db838d67d42948cc1593ff14025ce4ce452b56",
+      "source_page_url": "https://starwars.fandom.com/wiki/Trident-class_assault_ship",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/c/ce/Trident-SWZ.png/revision/latest",
+      "source_raw_sha256": "856e947cd9e58c9b94fbc4ca05107ccdc984e4aa486284110f2ca1e238ac6660",
+      "pixel_sha256": "1849b298fd4531d0a1752eed5c42583eab80737aac33a28bc997f5d77b34a602",
+      "reviewed_sha256": "6b20d8ad5135d93c7ab1825725b72309a5dfab2ef4aceafe2920b1697f1bbb42",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1560,
-          878
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          534
-        ],
-        "placement_xy": [
-          38,
-          390
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            990
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          600,
+          580
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "black-one": {
       "path": "assets/art/black-one.png",
@@ -28690,46 +28827,54 @@
     "resistance-transport": {
       "path": "assets/art/resistance-transport.png",
       "subject_id": "resistance-transport",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/resistance-transport",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/ep8-ff-004996_8ab70142.jpeg?region=0%2C0%2C1280%2C720",
-      "source_raw_sha256": "d287de9695279a6494a04958686dec7ad5a67f35550e4b106934037d0131dffd",
-      "pixel_sha256": "2def2cc528942298435379669decfa1fc0dc9366ae0518e175187eec2e676b9d",
-      "reviewed_sha256": "1e37afedf428eff2bb21b862d94015620346d4fa7dd8218dd505319ea5cbe098",
+      "source_page_url": "https://starwars.fandom.com/wiki/U-55_orbital_loadlifter",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/0/02/ResistanceTransport.png/revision/latest",
+      "source_raw_sha256": "e81c0dc6ca0f76cc1e46f68296472d4bb768a19f4161aaa0c35d16851d19384b",
+      "pixel_sha256": "e0d7466dfb1f6407baf0f5f168bb82c32fd25d5b825c2453c1d03d16980f3710",
+      "reviewed_sha256": "a2da0d0762b5d6d1a9da9586b75c71533242b703ab650b0cadbab6446c80d6f6",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1280,
-          720
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          533
-        ],
-        "placement_xy": [
-          38,
-          391
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            285
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          1940,
+          540
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "sea-skiff": {
       "path": "assets/art/sea-skiff.png",
@@ -29133,46 +29278,54 @@
     "canto-bight-police-speeder": {
       "path": "assets/art/canto-bight-police-speeder.png",
       "subject_id": "canto-bight-police-speeder",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/canto-bight-police-speeder",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/tlj-canto-bight-police-speeder_7693bdab.jpeg?region=0%2C0%2C1560%2C878",
-      "source_raw_sha256": "4a9944903f74c8f43e830cbce8231eb2b1f0e010a1817050a6b5729f0e91b26b",
-      "pixel_sha256": "20037eda4155c8083a79c0b597dd4e4c765c96f22af30600486fb0755ef0e408",
-      "reviewed_sha256": "a69a07bb083afa0408a58744867d6c9fe41584b197ace3fd82dc5df2e730880a",
+      "source_page_url": "https://starwars.fandom.com/wiki/Zephyr_GB-134_speeder",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/d/de/GB-134.png/revision/latest",
+      "source_raw_sha256": "85a2d9415e7b56870ced473696a093d24a5b4aba31583f20d886898a1dd4c9a9",
+      "pixel_sha256": "a35ec36568e2c2df2ebea7e9db8a896fd8404ff7d37779e22a8a5136618636f4",
+      "reviewed_sha256": "1ef82eaab32dc397ac0ff1c33f20a1d8e2230105b0e4a52effd3f22013eeb21d",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1560,
-          878
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          534
-        ],
-        "placement_xy": [
-          38,
-          390
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            878
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          1020,
+          875
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "canto-bight-speeders": {
       "path": "assets/art/canto-bight-speeders.png",
@@ -31693,11 +31846,11 @@
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/brain-worm",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/brain-worm_b3368a19.jpeg",
-      "source_raw_sha256": "56e2e13a870fe4981b20d06660fc83dae6c445ac953a69e826e957c908c724ea",
-      "pixel_sha256": "601b1c1600320c96690af1118b7b449b7bdfa873586ab4b051d692fe046b744a",
-      "reviewed_sha256": "1780fa49c62e9f6fe601e0fabc5dbd7547482bd7055f64cc688295b4758e8b31",
+      "source_page_url": "https://starwars.fandom.com/wiki/Brain_worm",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/6/6f/BrainWorm-TCW.png/revision/latest",
+      "source_raw_sha256": "39ca3381485411ab0b5a87a0680706162002edde82cdd399c8d80d6363dbbbd9",
+      "pixel_sha256": "4aaf78cdbfb0da4e7220516c91e77efc8973124d5788f83b2d1bff9d6579c74c",
+      "reviewed_sha256": "ddc6c6eb2ec1446279c15616be51b05aa8c6fda7202582b0b0dec3c56892554b",
       "normalization": {
         "crop_center": [
           0.5,
@@ -31715,7 +31868,7 @@
           ],
           "size": [
             1024,
-            576
+            648
           ],
           "matte_rgb": [
             4,
@@ -31726,8 +31879,13 @@
         "requested_crop_box": [
           0,
           0,
-          1560,
-          878
+          632,
+          400
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
         ]
       },
       "recipe": "official-source-v1"
@@ -33059,17 +33217,19 @@
     "imperial-death-trooper": {
       "path": "assets/art/imperial-death-trooper.png",
       "subject_id": "imperial-death-trooper",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/imperial-death-troopers",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/death-troopers-main_dd93335e.jpeg?region=307%2C29%2C809%2C455",
-      "source_raw_sha256": "405f4876b4e368a0cef626a48bed8de0c61514295ea20872d709f2316cb6d728",
-      "pixel_sha256": "a1b027071a2bf26427660ae663bd86e94348907a3ef74173d9a48fdbf36e4d27",
-      "reviewed_sha256": "2425fc07ca0d9cb1c7fe31025d75648bb4b52c43f062c3c65e2e15071451be79",
+      "source_page_url": "https://starwars.fandom.com/wiki/Death_trooper",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/6/69/Death_trooper_Fathead.png/revision/latest",
+      "source_raw_sha256": "398ee066ffd3571314e0feb8934cbf4737141c1717e114a7af8522858d94d461",
+      "pixel_sha256": "bdda56f3753b1b986d64e492822cbac73e64328863697a605cf62306f3755471",
+      "reviewed_sha256": "268520a3400a218e9cd05b599a0c65e0bcd8f27da7971ea041a99a0fbcf4418d",
       "normalization": {
         "crop_center": [
-          0.62799,
+          0.5,
           0.5
         ],
         "fit_mode": "contain",
@@ -33080,11 +33240,11 @@
         "placement": {
           "xy": [
             0,
-            120
+            0
           ],
           "size": [
-            1024,
-            576
+            524,
+            1180
           ],
           "matte_rgb": [
             4,
@@ -33095,13 +33255,16 @@
         "requested_crop_box": [
           0,
           0,
-          809,
-          455
+          1820,
+          4100
+        ],
+        "flatten_alpha": [
+          4,
+          12,
+          28
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "imperial-clone-shock-trooper": {
       "path": "assets/art/imperial-clone-shock-trooper.png",
@@ -33748,14 +33911,16 @@
     "r2-rude-beeps": {
       "path": "assets/art/r2-rude-beeps.png",
       "subject_id": "r2-d2",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/news/6-of-c-3pos-best-insults",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/image_6e93ebc6.png",
-      "source_raw_sha256": "6949fd6675e3f64aa04284bf5198302e10a57092f20e07c41601c00e933a8a64",
-      "pixel_sha256": "bec67e019173d853a51bcf0421eec2e899d2f9b7379c8e97a833929aaa989e34",
-      "reviewed_sha256": "176a1e95122fc512a8f0e931ab2f7159bdfda94a4a425d319a8120e77dd30fb3",
+      "source_page_url": "https://starwars.fandom.com/wiki/R2-D2",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/b/b1/Artoo_blasted_on_Endor.jpg/revision/latest",
+      "source_raw_sha256": "61f2396b9bae811c28c0602f407c28ff333deb540aa424586be11571dc4e1a59",
+      "pixel_sha256": "ef7569ba79fc4f5ed00b5f77d93ca6123e7471dd3d91a2f9ba79ec8f17891966",
+      "reviewed_sha256": "0c24909df8d81f4ab2f106e6b47e0f0cba6700b675e5db9ffe5b529751e9f80e",
       "normalization": {
         "crop_center": [
           0.5,
@@ -33773,7 +33938,7 @@
           ],
           "size": [
             1024,
-            572
+            1161
           ],
           "matte_rgb": [
             4,
@@ -33782,15 +33947,13 @@
           ]
         },
         "requested_crop_box": [
-          100,
-          0,
-          1024,
-          516
+          470,
+          40,
+          1200,
+          868
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "sand-hater": {
       "path": "assets/art/sand-hater.png",
@@ -35960,37 +36123,51 @@
       "rights_status": "unverified"
     },
     "rey-skywalker-exegol": {
-      "path": "assets/art/rey.png",
+      "path": "assets/art/rey-skywalker-exegol.png",
       "subject_id": "rey",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/databank/rey",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/rey-training_1be2486c.jpeg?region=0%2C0%2C1280%2C536",
-      "source_raw_sha256": "2cda3add7bfeb147c4259fa58de5e74d3bafa2dfc058547ebb94db74ea25b6fc",
-      "pixel_sha256": "ac16b94a9a4b4d0fb2a4240b585834ba8e144d8774130d99a6e19af9feb1ff65",
-      "reviewed_sha256": "9644662ced208b45cf9134fe939d1ee3c7703d7c83977cfd817233dd9afc52e2",
+      "source_page_url": "https://starwars.fandom.com/wiki/Rey_Skywalker",
+      "source_image_url": "https://static.wikia.nocookie.net/starwars/images/7/75/ReyEndsSidious-TROS.png/revision/latest",
+      "source_raw_sha256": "d76f4a9ac2a4ab55622c64324c3f5d31fe937fe07ffdf2b865c0e2ca433dfe62",
+      "pixel_sha256": "4d9b629cd6d23fb800ed17c3a932801be95b3fa157a4691e6b484bb359708e0d",
+      "reviewed_sha256": "057208df79e7cba46fbf7b091bd3db9f78c55138f25da152cde4caed39e6aa40",
       "normalization": {
         "crop_center": [
           0.5,
           0.5
         ],
-        "fit_mode": "cover",
+        "fit_mode": "contain",
         "output_size": [
           1024,
           1536
         ],
-        "placement": null,
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            736
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
         "requested_crop_box": [
-          461,
-          27,
-          755,
-          525
+          880,
+          250,
+          1700,
+          839
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "revan-the-prodigal-knight": {
       "path": "assets/art/darth-revan.png",
