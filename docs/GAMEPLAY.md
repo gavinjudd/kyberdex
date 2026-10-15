@@ -46,7 +46,7 @@ The public encounter shows collectors and remaining slots. The successful captur
 | `/vault craft` | Review the selected result, exact consumed copies and cost. |
 | `/vault salvage` | Review duplicates and credit return before recycling. |
 | `/vault trade` | Open a trade table with someone (they're pinged); optionally pre-load your offer. One-sided offers work. |
-| `/vault give` | Gift up to five copies to another member after a review step. |
+| `/vault give` | Gift up to ten copies to another member after a review step. The public notice shows each card's rarity. |
 | `/vault gamble coinflip` · `slots` · `wager` · `stats` | Optional credit games. See below. |
 
 Trades allow up to 10 copies per side, three open tables per player and a one-hour window. Favorites and saved deck cards may be traded or given; they leave the deck and lose favorite status. Copies in another trade or an active raid stay locked. Favorites, escrow and active loadouts are still protected from crafting and recycling. Changing a trade invalidates both parties' confirmations; both must accept the same offer revision. The ownership exchange is atomic. Published rarity reference values are game reference values, not a real-world price.
@@ -61,7 +61,7 @@ All games use in-game credits only. Credits can't be bought or cashed out, and c
 | Kessel Run slots | Three reels. Three of a kind pays 3× to 100× (💎 Kyber Crystal); any pair pays 1.2×, a Kyber pair 5×. Long-run return is about 91%. |
 | Wager | Challenge a member to a coin toss. Both stakes settle when they accept; the winner takes the pot minus 5%. Expires after two minutes. |
 
-Bets are 10–1,000 credits, with at most 5,000 credits wagered per member per UTC day. Every game keeps a small house edge, so gambling removes credits from the economy over time. Server managers can switch it off with `/vault-admin gambling`.
+Bets are 10–1,000 credits, with at most 5,000 credits wagered per member per UTC day. Every game keeps a small house edge, so gambling removes credits from the economy over time. Results always post publicly in the channel, mentioning the player. Server managers can switch it off with `/vault-admin gambling`.
 
 ## Ground and Fleet battles
 
@@ -83,7 +83,14 @@ These commands require **Manage Server**:
 | `/vault-admin health` | Inspect gateway, storage and scheduler readiness. |
 | `/vault-admin complaints` | Read private reports and mark them reviewed. |
 | `/vault-admin failed-names` | Review rejected capture names for missing valid aliases. |
-| `/vault-admin give` | Mint 1–10 copies of any card for a member, with an optional public announcement. Numbered editions keep their cap. |
+| `/vault-admin give` | Mint 1–10 copies of any card for a member, with an optional public announcement that shows the card's rarity. Numbered editions keep their cap. |
+| `/vault-admin credits` | Give a member any number of credits (up to one trillion per grant). |
+| `/vault-admin take` | Remove specific copies from a member's collection. Undo with `restore-inventory`. |
+| `/vault-admin move` | Move specific copies from one member to another, including favorited or bound copies. |
+| `/vault-admin take-credits` · `set-credits` | Remove credits (never below zero) or set a balance exactly. |
+| `/vault-admin inspect` | See a member's balance, record and full collection, with a JSON export. |
+| `/vault-admin cancel-trades` | Cancel a member's open trades and pending wagers. |
+| `/vault-admin history` | Recent gifts, grants, removals and credit changes, optionally for one member. |
 | `/vault-admin clear-inventory` | Remove every card a member owns after a button confirmation; cancels their open trades. |
 | `/vault-admin restore-inventory` | Undo a clear. |
 | `/vault-admin gambling` | Turn credit games on or off. |

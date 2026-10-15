@@ -387,14 +387,6 @@ def wager_view(wager):
                        disabled=wager["status"] != "pending")
 
 
-async def announce_big_win(bot, interaction, text):
-    try:
-        await discord_request(interaction.channel.send(content=text, allowed_mentions=discord.AllowedMentions(
-            users=[interaction.user], everyone=False, roles=False)))
-    except (DISCORD_ERRORS + (AttributeError,)) as error:
-        log.warning("Big-win announcement skipped: %s", type(error).__name__)
-
-
 async def handle_component(bot, interaction, action, entity):
     from .bot import reply
     user = str(interaction.user.id)
@@ -578,7 +570,7 @@ async def handle_component(bot, interaction, action, entity):
         await refresh_trade(bot, trade)
         return
     if action in ("wageraccept", "wagerdecline"):
-        await discord_request(interaction.response.defer(ephemeral=True))
+        await discord_request(interaction.response.defer())
         wager = await bot.call("get_wager", entity)
         bot.verify_guild(wager, interaction)
         wager = await bot.call("wager_respond", entity, user, action == "wageraccept")
@@ -587,11 +579,13 @@ async def handle_component(bot, interaction, action, entity):
                                                            allowed_mentions=discord.AllowedMentions.none()))
         except (DISCORD_ERRORS + (AttributeError,)) as error:
             log.warning("Wager display skipped: %s", type(error).__name__)
+        loser = wager["b"] if wager.get("winner") == wager["a"] else wager["a"]
         if wager["status"] == "settled":
-            outcome = "You won" if wager["winner"] == user else "You lost"
-            await reply(interaction, content=f"{outcome}. {wager['stake']:,} credits each; the winner took {wager['result']['prize']:,}.")
+            text = (f"🪙 <@{wager['winner']}> beat <@{loser}> and took **{wager['result']['prize']:,} credits** "
+                    f"({wager['stake']:,} each, {WAGER_HOUSE_PERCENT}% to the house).")
         else:
-            await reply(interaction, content="Wager cancelled. No credits moved.")
+            text = f"<@{user}> called off the {wager['stake']:,}-credit wager. No credits moved."
+        await reply(interaction, content=text, ephemeral=False)
         return
     if action in ("acceptduel", "cancelduel"):
         await discord_request(interaction.response.defer(ephemeral=True))
@@ -626,14 +620,14 @@ async def starter_notice(bot, interaction):
         return ""
     if not pack:
         return ""
-    names = ", ".join(f"**{item['name']}**" for item in pack["instances"])
+    names = ", ".join(f"**{item['name']}** ({item['card']['rarity'].title()})" for item in pack["instances"])
     return (f"🎁 Welcome to KyberDex! Your starter pack: {names} and **{pack['credits']} credits**. "
             "They're in `/vault collection`, and together they make a full Ground deck (`/vault deck`).")
 
 
 async def announce_gift(bot, interaction, result):
     from .bot import reply
-    names = ", ".join(f"**{card['name']}**" for card in result["cards"])
+    names = ", ".join(f"**{card['name']}** ({card['rarity'].title()})" for card in result["cards"])
     if result.get("replayed"):
         await reply(interaction, content=f"That gift already went through: {names}.")
         return
@@ -956,54 +950,55 @@ def add_feature_commands(group, bot):
 
     gamble = app_commands.Group(name="gamble", description="Bet credits on coin flips, slots or a wager with a friend")
 
+    def bettor(interaction):
+        return getattr(interaction.user, "mention", f"<@{interaction.user.id}>")
+
     @gamble.command(name="coinflip", description=f"Call it: win double your bet ({GAMBLE_MIN}–{GAMBLE_MAX:,} credits)")
     @app_commands.choices(side=[app_commands.Choice(name="Heads", value="heads"), app_commands.Choice(name="Tails", value="tails")])
     async def coinflip(interaction: discord.Interaction, amount: app_commands.Range[int, GAMBLE_MIN, GAMBLE_MAX], side: str):
-        await discord_request(interaction.response.defer(ephemeral=True))
+        await discord_request(interaction.response.defer(thinking=True))
         result = await bot.call("coinflip", str(interaction.guild_id), str(interaction.user.id), amount, side,
                                 request_id=str(interaction.id))
-        head = f"🪙 It landed **{result['landed']}**. " + (f"You win **{result['payout']:,} credits**!" if result["won"]
-                                                          else f"You lost {amount:,} credits.")
+        head = (f"{bettor(interaction)} bet **{amount:,}** on {side}. 🪙 It landed **{result['landed']}**: "
+                + (f"**won {result['payout']:,} credits!**" if result["won"] else "lost."))
         embed = panel("Coin flip", head + f"\nBalance: **{result['credits']:,}** · Bet today: {result['wagered_today']:,}/{result['daily_cap']:,}")
         embed.set_footer(text=GAMBLE_FOOTER)
-        await reply(interaction, embed=embed)
+        await reply(interaction, embed=embed, ephemeral=False)
 
     @gamble.command(name="slots", description=f"Spin the Kessel Run slots ({GAMBLE_MIN}–{GAMBLE_MAX:,} credits)")
     async def slots(interaction: discord.Interaction, amount: app_commands.Range[int, GAMBLE_MIN, GAMBLE_MAX]):
-        await discord_request(interaction.response.defer(ephemeral=True))
+        await discord_request(interaction.response.defer(thinking=True))
         result = await bot.call("slots", str(interaction.guild_id), str(interaction.user.id), amount, request_id=str(interaction.id))
         reels = " ".join(SLOT_ICONS.get(name, "❔") for name in result["reels"])
-        line = (f"**{result['multiplier']:g}× — {result['payout']:,} credits**" if result["payout"] else "No match this time.")
+        line = (f"**{result['multiplier']:g}× — won {result['payout']:,} credits!**" if result["payout"] else "No match this time.")
+        if result.get("jackpot"):
+            line = "🎰 **JACKPOT!** " + line
         table = " · ".join(f"{SLOT_ICONS[name]}×3 = {pay}×" for name, _, pay in SLOT_SYMBOLS)
-        embed = panel("Kessel Run slots", f"# {reels}\n{line}\nBalance: **{result['credits']:,}** · Bet today: "
+        embed = panel("Kessel Run slots", f"{bettor(interaction)} bet **{amount:,}**\n# {reels}\n{line}\nBalance: **{result['credits']:,}** · Bet today: "
                       f"{result['wagered_today']:,}/{result['daily_cap']:,}\n-# {table} · any pair 1.2× · 💎 pair 5×")
         embed.set_footer(text=GAMBLE_FOOTER)
-        await reply(interaction, embed=embed)
-        if result.get("jackpot") and not result.get("replayed"):
-            await announce_big_win(bot, interaction, f"🎰 {interaction.user.mention} hit **{reels}** on the Kessel Run slots "
-                                   f"and won **{result['payout']:,} credits**!")
+        await reply(interaction, embed=embed, ephemeral=False)
 
     @gamble.command(name="wager", description="Challenge someone to a coin toss for credits; winner takes the pot")
     async def wager(interaction: discord.Interaction, member: discord.Member, amount: app_commands.Range[int, GAMBLE_MIN, GAMBLE_MAX]):
-        await discord_request(interaction.response.defer(ephemeral=True))
+        await discord_request(interaction.response.defer(thinking=True))
         if member.bot or member.id == interaction.user.id:
             raise ValueError("Choose another person, not yourself or a bot.")
         record = await bot.call("wager_create", str(interaction.guild_id), str(interaction.user.id), str(member.id), amount)
-        message = await discord_request(interaction.channel.send(
+        await discord_request(interaction.followup.send(
             content=f"{member.mention}, you've been challenged!", embed=wager_panel(record), view=wager_view(record),
             allowed_mentions=discord.AllowedMentions(users=[member], everyone=False, roles=False)))
-        await reply(interaction, content=f"Challenge posted: {message.jump_url}")
 
     @gamble.command(name="stats", description="Your betting record and today's remaining limit")
     async def gamble_stats(interaction: discord.Interaction):
-        await discord_request(interaction.response.defer(ephemeral=True))
+        await discord_request(interaction.response.defer(thinking=True))
         row = await bot.call("gamble_stats", str(interaction.guild_id), str(interaction.user.id))
-        embed = panel("Your betting record", f"**{row['bets']}** bets · {row['wagered']:,} wagered · {row['won']:,} paid out\n"
+        embed = panel("Betting record", f"{bettor(interaction)}\n**{row['bets']}** bets · {row['wagered']:,} wagered · {row['won']:,} paid out\n"
                       f"Net: **{row['net']:+,} credits** · Biggest payout: {row['biggest_payout']:,}\n"
                       f"Wagers: {row['wager_wins']} won of {row['wagers']}\n"
                       f"Bet today: {row['wagered_today']:,}/{row['daily_cap']:,} · Balance: **{row['credits']:,}**")
         embed.set_footer(text=GAMBLE_FOOTER)
-        await reply(interaction, embed=embed)
+        await reply(interaction, embed=embed, ephemeral=False)
 
     for command in (profile,daily,recipes,salvage,craft,trade,give,deck,duel,raid,market,gamble):
         group.add_command(command)

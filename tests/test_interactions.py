@@ -593,27 +593,77 @@ async def test_gamble_wager_buttons_settle_and_update_the_public_message(bot):
             bot.game._credit(connection, "42", user, 1000, "fixture", user, time.time())
     gamble = bot.tree.get_command("vault").get_command("gamble")
     event = interaction(101)
-    message = SimpleNamespace(id=901, jump_url="https://discord.test/901", edit=AsyncMock())
-    event.channel = SimpleNamespace(send=AsyncMock(return_value=message))
     await gamble.get_command("wager").callback(event, member(102), 200)
-    wager_id = event.channel.send.await_args.kwargs["view"].children[0].custom_id.split(":")[2]
+    event.response.defer.assert_awaited_once_with(thinking=True)
+    sent = event.followup.send.await_args.kwargs
+    assert "ephemeral" not in sent or sent["ephemeral"] is False
+    wager_id = sent["view"].children[0].custom_id.split(":")[2]
+    message = SimpleNamespace(edit=AsyncMock())
     accept = interaction(102)
     accept.message = message
     await handle_component(bot, accept, "wageraccept", wager_id)
-    settled = bot.game.get_wager(wager_id)
-    assert settled["status"] == "settled"
+    assert bot.game.get_wager(wager_id)["status"] == "settled"
     total = bot.game.profile("42", "101")["credits"] + bot.game.profile("42", "102")["credits"]
     assert total == 2000 - 20  # 5% of the 400 pot
     message.edit.assert_awaited()
+    assert accept.followup.send.await_args.kwargs["ephemeral"] is False
 
 
 @pytest.mark.asyncio
-async def test_slots_command_reports_balance_privately(bot):
+async def test_gamble_results_are_public(bot):
     with bot.game._tx() as connection:
         bot.game._credit(connection, "42", "101", 500, "fixture", "x", time.time())
-    event = interaction(101)
-    event.id = 7777
     gamble = bot.tree.get_command("vault").get_command("gamble")
-    await gamble.get_command("slots").callback(event, 50)
-    sent = event.followup.send.await_args.kwargs
-    assert sent["ephemeral"] is True and "Balance" in sent["embed"].description
+    for name, args in (("slots", (50,)), ("coinflip", (50, "heads")), ("stats", ())):
+        event = interaction(101)
+        event.id = hash(name) & 0xFFFF
+        await gamble.get_command(name).callback(event, *args)
+        event.response.defer.assert_awaited_once_with(thinking=True)
+        sent = event.followup.send.await_args.kwargs
+        assert sent["ephemeral"] is False and "Balance" in sent["embed"].description
+
+
+@pytest.mark.asyncio
+async def test_admin_suite_take_move_credits_inspect(bot):
+    group = bot.tree.get_command("vault-admin")
+    rex = seed_card(bot, 102)
+    cody = seed_card(bot, 102, "commander-cody")
+    admin = interaction(101)
+    admin.id = 9001
+    await group.get_command("take").callback(group, admin, member(102), rex["id"], False)
+    assert [row["id"] for row in bot.game.inventory("42", "102")] == [cody["id"]]
+    ref = bot.game.inventory_clears("42")[0]["id"]
+    bot.game.admin_restore_inventory("42", "101", ref)
+    await group.get_command("move").callback(group, interaction(101), member(102), member(103), cody["id"])
+    assert bot.game.info("42", "103", cody["id"])["user_id"] == "103"
+    grant = interaction(101)
+    grant.id = 9002
+    grant.channel = SimpleNamespace(send=AsyncMock())
+    await group.get_command("credits").callback(group, grant, member(102), 5000, "", False)
+    take = interaction(101)
+    take.id = 9003
+    await group.get_command("take-credits").callback(group, take, member(102), 99999)
+    assert bot.game.profile("42", "102")["credits"] == 0
+    setc = interaction(101)
+    setc.id = 9004
+    await group.get_command("set-credits").callback(group, setc, member(102), 1234)
+    assert bot.game.profile("42", "102")["credits"] == 1234
+    look = interaction(101)
+    await group.get_command("inspect").callback(group, look, member(102))
+    assert "1,234 credits" in look.followup.send.await_args.kwargs["embed"].description
+    hist = interaction(101)
+    await group.get_command("history").callback(group, hist)
+    assert "credits" in hist.followup.send.await_args.kwargs["embed"].description
+
+
+@pytest.mark.asyncio
+async def test_gift_announcement_names_rarity(bot):
+    rex = seed_card(bot, 101)
+    event = interaction(101)
+    command = bot.tree.get_command("vault").get_command("give")
+    await command.callback(event, member(102), rex["id"], "")
+    key = next(k for k, v in bot.pending_confirmations.items() if v.get("method") == "give")
+    confirm = interaction(101)
+    confirm.channel = SimpleNamespace(send=AsyncMock())
+    await handle_component(bot, confirm, "confirm", key)
+    assert "(Rare)" in confirm.channel.send.await_args.kwargs["content"]

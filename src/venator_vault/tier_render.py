@@ -81,7 +81,7 @@ def _brushed(size, base, seed):
 def _flat(stat_image):
     """A letterbox/matte line: nearly uniform and dark."""
     stat = ImageStat.Stat(stat_image)
-    return stat.stddev[0] < 10 and stat.mean[0] < 48
+    return stat.stddev[0] < 3.5 and stat.mean[0] < 40
 
 
 def trim_matte(image):
@@ -97,12 +97,16 @@ def trim_matte(image):
         left += 1
     while right > left + w // 4 and _flat(gray.crop((right, top, right + 1, bottom))):
         right -= 1
+    if (right - left + 1) < w * .3 or (bottom - top + 1) < h * .3:
+        return image
     return image.crop((left, top, right + 1, bottom + 1))
 
 
 def subject_region(image, entry):
     """The published pixels inside a reviewed composition, without its matte."""
     norm = (entry or {}).get("normalization") or {}
+    if norm.get("fit_mode") == "cover":
+        return image  # already a full-frame picture with no matte
     box = None
     if norm.get("placement_xy") and norm.get("placement_size"):
         (x, y), (w, h) = norm["placement_xy"], norm["placement_size"]
@@ -156,6 +160,67 @@ def cover(image, size):
     return resized.crop((x, y, x + tw, y + th))
 
 
+ART_BOX = (0, 0, 1000, 1010)   # picture area above the rules plate
+
+
+def brighten(image, target=96):
+    """Lift dark published stills so the subject reads on a small Discord card."""
+    gray = image.convert("L").resize((64, 64))
+    mean = ImageStat.Stat(gray).mean[0]
+    if mean >= 72:
+        return image
+    image = ImageOps.autocontrast(image, cutoff=1, preserve_tone=True)
+    mean = max(1.0, ImageStat.Stat(image.convert("L").resize((64, 64))).mean[0])
+    if mean < target:
+        gamma = math.log(target / 255) / math.log(mean / 255)
+        lut = [round(255 * (i / 255) ** gamma) for i in range(256)]
+        image = image.point(lut * 3)
+    return image
+KEEP_X = 0.9                  # wide shots: subjects sit anywhere across the frame
+KEEP_Y = 0.72                 # tall shots: heads sit near the top
+
+
+def place_art(image, size=SIZE, box=ART_BOX):
+    """Blurred full-card backdrop plus the picture, cropped at most 10% wide / 28% tall.
+
+    Wide or tall sources keep the reviewed subject visible instead of being
+    zoomed into a slice; edges feather into the backdrop.
+    """
+    image = brighten(image.convert("RGB"))
+    backdrop = ImageOps.fit(image, size, Image.Resampling.BILINEAR).filter(ImageFilter.GaussianBlur(28))
+    backdrop = Image.blend(backdrop, Image.new("RGB", size, (6, 8, 12)), .45)
+    bw, bh = box[2] - box[0], box[3] - box[1]
+    iw, ih = image.size
+    cover_scale = max(bw / iw, bh / ih)
+    scale = min(cover_scale, bw / (KEEP_X * iw), bh / (KEEP_Y * ih))
+    scale = max(scale, min(bw / iw, bh / ih))
+    resized = image.resize((max(1, round(iw * scale)), max(1, round(ih * scale))), Image.Resampling.LANCZOS)
+    if scale > 1.25:
+        resized = resized.filter(ImageFilter.UnsharpMask(radius=2, percent=60, threshold=2))
+    # Crop whatever exceeds the box: horizontally around the centre (lightly
+    # steered by detail), vertically biased upward where heads usually are.
+    cw, ch = min(bw, resized.width), min(bh, resized.height)
+    x = (resized.width - cw) // 2
+    y = 0  # tall images keep their top edge, where heads are
+    x = min(max(0, x), resized.width - cw)
+    tile = resized.crop((x, y, x + cw, y + ch))
+    mask = Image.new("L", tile.size, 255)
+    feather = 70
+    md = ImageDraw.Draw(mask)
+    for i in range(feather):
+        a = round(255 * (i / feather) ** 1.6)
+        if tile.height < bh:
+            md.line((0, i, tile.width, i), fill=a)
+            md.line((0, tile.height - 1 - i, tile.width, tile.height - 1 - i), fill=a)
+        if tile.width < bw:
+            md.line((i, 0, i, tile.height), fill=min(a, 255))
+            md.line((tile.width - 1 - i, 0, tile.width - 1 - i, tile.height), fill=a)
+    px = box[0] + (bw - cw) // 2
+    py = box[1] + max(0, round((bh - ch) * .35))
+    backdrop.paste(tile, (px, py), mask)
+    return backdrop
+
+
 # ---------- drawing helpers ----------
 
 def _sigil(draw, cx, cy, r, shape, color):
@@ -196,7 +261,7 @@ def _diamond(draw, x, y, r, fill, outline=None):
     draw.polygon(pts, fill=fill, outline=outline)
 
 
-def _shade(size, top_alpha=210, bottom_start=700, bottom_alpha=240):
+def _shade(size, top_alpha=170, bottom_start=760, bottom_alpha=235):
     shade = Image.new("L", (1, size[1]))
     values = []
     for y in range(size[1]):
@@ -304,13 +369,13 @@ def animated_layers(card, size, phase):
         layer.alpha_composite(_sparkles(size, seed, phase, 8, (255, 230, 160), k, (0, 0, w, h * .7)))
     elif rarity == "mythic":
         tint = _iridescent(size, phase).convert("RGBA")
-        tint.putalpha(34)
+        tint.putalpha(20)
         layer.alpha_composite(tint)
         layer.alpha_composite(_holo_border(size, phase, round(14 * k)))
         layer.alpha_composite(_band(size, 30, phase, 200 * k, (255, 255, 255), 85))
         layer.alpha_composite(_sparkles(size, seed, phase, 22, (255, 200, 215), k, (0, 0, w, h * .72)))
     elif rarity == "celestial":
-        layer.alpha_composite(_rays(size, (w * .5, h * .3), phase, 14, (255, 236, 190), 20))
+        layer.alpha_composite(_rays(size, (w * .5, h * .3), phase, 14, (255, 236, 190), 12))
         layer.alpha_composite(_holo_border(size, phase, round(10 * k), 230))
         layer.alpha_composite(_band(size, 26, phase, 240 * k, (255, 250, 230), 100))
         layer.alpha_composite(_sparkles(size, seed, phase, 30, (255, 244, 210), 1.15 * k, (0, 0, w, h * .7)))
@@ -369,7 +434,13 @@ def compose_tier(renderer, card, art, *, phase=0.25, glint=True):
     faction_color, sigil = FACTIONS.get(card.get("faction"), DEFAULT_FACTION)
 
     canvas = _frame(card, tier, phase).convert("RGBA")
-    filled = cover(art.convert("RGB"), SIZE).convert("RGBA")
+    pad = max(inset, 24) + 30
+    top = pad + (120 if rarity == "epic" else 0)
+    title = re.sub(r"\s+", " ", str(card["name"])).upper()
+    title_font, lines = renderer._wrap(title, 680 - (40 if rarity == "epic" else 0), 100, 2, 40, "heading")
+    title_bottom = top + len(lines) * (title_font.size + 2) + 40   # includes the arena/role line
+    # The picture starts just under the title so names never cover faces.
+    filled = place_art(art, box=(0, max(0, title_bottom - 24), w, 1000)).convert("RGBA")
     # Art-only finishes sit under the text shading so labels stay crisp.
     if rarity == "rare":
         filled = Image.alpha_composite(filled, _band(SIZE, 28, phase, 260, (190, 235, 255), 120))
@@ -382,11 +453,11 @@ def compose_tier(renderer, card, art, *, phase=0.25, glint=True):
         filled = Image.alpha_composite(filled, stripes)
     elif rarity == "mythic":
         foil = _iridescent(SIZE, phase).convert("RGB")
-        filled = Image.blend(filled.convert("RGB"), ImageChops.screen(filled.convert("RGB"), foil), .22).convert("RGBA")
+        filled = Image.blend(filled.convert("RGB"), ImageChops.screen(filled.convert("RGB"), foil), .12).convert("RGBA")
     elif rarity == "celestial":
         gold = Image.new("RGB", SIZE, (255, 226, 160))
-        filled = Image.blend(filled.convert("RGB"), ImageChops.screen(filled.convert("RGB"), gold), .14).convert("RGBA")
-        filled = Image.alpha_composite(filled, _rays(SIZE, (500, 360), .2, 14, (255, 240, 200), 12))
+        filled = Image.blend(filled.convert("RGB"), ImageChops.screen(filled.convert("RGB"), gold), .08).convert("RGBA")
+        filled = Image.alpha_composite(filled, _rays(SIZE, (500, 360), .2, 14, (255, 240, 200), 6))
     filled = Image.alpha_composite(filled, _shade(SIZE))
     canvas.paste(filled, (0, 0), _window_mask(card, inset))
     draw = ImageDraw.Draw(canvas)
@@ -458,10 +529,6 @@ def compose_tier(renderer, card, art, *, phase=0.25, glint=True):
         return font
 
     # Title block.
-    pad = max(inset, 24) + 30
-    top = pad + (120 if rarity == "epic" else 0)
-    title = re.sub(r"\s+", " ", str(card["name"])).upper()
-    title_font, lines = renderer._wrap(title, 680 - (40 if rarity == "epic" else 0), 100, 2, 40, "heading")
     y = top - 6
     glow_color = {"legendary": (255, 210, 120), "mythic": (255, 110, 150), "celestial": (255, 236, 170)}.get(rarity)
     if glow_color:

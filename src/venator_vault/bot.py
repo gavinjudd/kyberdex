@@ -1056,9 +1056,9 @@ class AdminCommands(app_commands.Group, name="vault-admin", description="Configu
                                     {"guild_id": str(interaction.guild_id), "to": str(member.id), "card_id": card,
                                      "count": count, "transfer_id": result["id"]})
         definition = self.bot.game.catalog[card]
-        label = f"{count}× **{definition['name']}**" if count > 1 else f"**{definition['name']}**"
+        label = (f"{count}× **{definition['name']}**" if count > 1 else f"**{definition['name']}**") + f" ({definition['rarity'].title()})"
         if announce and not result.get("replayed"):
-            text = f"🎁 {member.mention} received {label} ({definition['rarity'].title()}) from the server team."
+            text = f"🎁 {member.mention} received {label} from the server team."
             if note:
                 text += f"\n> {discord.utils.escape_mentions(note)}"
             try:
@@ -1069,6 +1069,143 @@ class AdminCommands(app_commands.Group, name="vault-admin", description="Configu
         await reply(interaction, content=(f"Already granted earlier (no duplicate made): {label} → {member.mention}." if result.get("replayed")
                                           else f"Granted {label} to {member.mention}. Copy IDs: " +
                                           ", ".join(f"`{key}`" for key in result["instance_ids"])))
+
+    @app_commands.command(name="credits", description="Give a member any number of credits")
+    @app_commands.describe(member="Who receives the credits", amount="How many credits", note="Optional reason, shown publicly",
+                           announce="Post a public message about it")
+    async def credits(self, interaction, member: discord.Member, amount: app_commands.Range[int, 1, 1_000_000_000_000],
+                      note: app_commands.Range[str, 0, 200] = "", announce: bool = True):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        if member.bot:
+            raise ValueError("Choose a person, not a bot.")
+        result = await self.bot.call("admin_credits", str(interaction.guild_id), str(interaction.user.id), str(member.id),
+                                     amount, request_id=str(interaction.id), note=note or None)
+        await self.bot.runtime_call("audit", interaction.user.id, "admin_credits",
+                                    {"guild_id": str(interaction.guild_id), "to": str(member.id), "amount": amount})
+        if announce and not result["replayed"]:
+            text = f"💰 {member.mention} received **{amount:,} credits** from the server team."
+            if note:
+                text += f"\n> {discord.utils.escape_mentions(note)}"
+            try:
+                await discord_request(interaction.channel.send(content=text, allowed_mentions=discord.AllowedMentions(
+                    users=[member], everyone=False, roles=False)))
+            except DISCORD_ERRORS as error:
+                log.warning("Credit announcement skipped: %s", type(error).__name__)
+        await reply(interaction, content=("Already granted (no duplicate). " if result["replayed"] else "")
+                    + f"{member.mention} now has **{result['credits']:,} credits**.")
+
+    async def autocomplete_member_copies(self, interaction, current):
+        """Copies owned by the member chosen in this command (member or from_member)."""
+        if (interaction.guild_id != self.bot.settings.guild_id or interaction.user.bot
+                or not interaction.permissions.manage_guild):
+            return []
+        namespace = getattr(interaction, "namespace", None)
+        target = getattr(namespace, "member", None) or getattr(namespace, "from_member", None)
+        target_id = getattr(target, "id", target)
+        if not target_id:
+            return []
+        words = current.replace(",", " ").split()
+        chosen = []
+        while words and len(words[0]) == 16 and all(char in "0123456789abcdef" for char in words[0]):
+            chosen.append(words.pop(0))
+        try:
+            rows = await asyncio.wait_for(self.bot.call("inventory", str(interaction.guild_id), str(target_id),
+                                                        search=" ".join(words), limit=25), 1.8)
+        except (TimeoutError, OSError):
+            return []
+        return [app_commands.Choice(name=f"{row['name']} · {row['card']['rarity'].title()} · {row['id']}"[:100],
+                                    value=" ".join([*chosen, row["id"]]))
+                for row in rows if row["id"] not in chosen and len(" ".join([*chosen, row["id"]])) <= 100][:25]
+
+    @staticmethod
+    def _copy_ids(text):
+        ids = [item for item in text.replace(",", " ").split() if item]
+        if not ids or any(len(item) != 16 or any(char not in "0123456789abcdef" for char in item) for item in ids):
+            raise ValueError("Pick copies from the autocomplete list (or paste 16-character copy IDs separated by spaces).")
+        return ids
+
+    @app_commands.command(name="take", description="Remove specific cards from a member's collection (undoable)")
+    @app_commands.autocomplete(copies=autocomplete_member_copies)
+    @app_commands.describe(member="Whose cards to remove", copies="Pick copies (search by name)", announce="Post a public note")
+    async def take(self, interaction, member: discord.Member, copies: str, announce: bool = False):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        result = await self.bot.call("admin_take_cards", str(interaction.guild_id), str(interaction.user.id), str(member.id),
+                                     self._copy_ids(copies), request_id=str(interaction.id))
+        await self.bot.runtime_call("audit", interaction.user.id, "admin_take",
+                                    {"guild_id": str(interaction.guild_id), "target": str(member.id), "ref": result["id"]})
+        names = ", ".join(f"**{card['name']}** ({card['rarity'].title()})" for card in result["cards"]) or "the selected copies"
+        if announce and not result["replayed"]:
+            try:
+                await discord_request(interaction.channel.send(content=f"Server staff removed {names} from {member.mention}.",
+                                      allowed_mentions=discord.AllowedMentions(users=[member], everyone=False, roles=False)))
+            except DISCORD_ERRORS as error:
+                log.warning("Removal announcement skipped: %s", type(error).__name__)
+        await reply(interaction, content=f"Removed {names} from {member.mention}. Undo reference: `{result['id']}` "
+                                         "(`/vault-admin restore-inventory`).")
+
+    @app_commands.command(name="move", description="Move cards from one member to another (bypasses favorites and binding)")
+    @app_commands.autocomplete(copies=autocomplete_member_copies)
+    async def move(self, interaction, from_member: discord.Member, to_member: discord.Member, copies: str):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        if to_member.bot:
+            raise ValueError("Choose a person, not a bot.")
+        result = await self.bot.call("admin_move_cards", str(interaction.guild_id), str(interaction.user.id),
+                                     str(from_member.id), str(to_member.id), self._copy_ids(copies))
+        await self.bot.runtime_call("audit", interaction.user.id, "admin_move",
+                                    {"guild_id": str(interaction.guild_id), "from": str(from_member.id), "to": str(to_member.id),
+                                     "copies": result["instance_ids"]})
+        names = ", ".join(f"**{card['name']}** ({card['rarity'].title()})" for card in result["cards"])
+        await reply(interaction, content=f"Moved {names} from {from_member.mention} to {to_member.mention}.")
+
+    @app_commands.command(name="take-credits", description="Remove credits from a member (never below zero)")
+    async def take_credits(self, interaction, member: discord.Member, amount: app_commands.Range[int, 1, 1_000_000_000_000]):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        result = await self.bot.call("admin_adjust_credits", str(interaction.guild_id), str(interaction.user.id), str(member.id),
+                                     remove=amount, request_id=str(interaction.id))
+        await self.bot.runtime_call("audit", interaction.user.id, "admin_take_credits",
+                                    {"guild_id": str(interaction.guild_id), "target": str(member.id), "delta": result["delta"]})
+        await reply(interaction, content=f"Removed **{-result['delta']:,} credits** from {member.mention}. "
+                                         f"Balance: {result['before']:,} → **{result['credits']:,}**.")
+
+    @app_commands.command(name="set-credits", description="Set a member's credit balance exactly")
+    async def set_credits(self, interaction, member: discord.Member, balance: app_commands.Range[int, 0, 1_000_000_000_000]):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        result = await self.bot.call("admin_adjust_credits", str(interaction.guild_id), str(interaction.user.id), str(member.id),
+                                     set_to=balance, request_id=str(interaction.id))
+        await self.bot.runtime_call("audit", interaction.user.id, "admin_set_credits",
+                                    {"guild_id": str(interaction.guild_id), "target": str(member.id), "delta": result["delta"]})
+        await reply(interaction, content=f"{member.mention}: {result['before']:,} → **{result['credits']:,} credits**.")
+
+    @app_commands.command(name="inspect", description="See a member's balance, record and full collection")
+    async def inspect(self, interaction, member: discord.Member):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        data = await self.bot.call("admin_inspect", str(interaction.guild_id), str(member.id))
+        profile, copies = data["profile"], data["copies"]
+        from collections import Counter
+        by_rarity = Counter(copy["rarity"] for copy in copies)
+        lines = "\n".join(f"{'★' if c['favorite'] else '·'} **{c['name']}** · {c['rarity'].title()} · `{c['id']}`"
+                          + (" · in trade" if c["in_trade"] else "") for c in copies[:20])
+        embed = panel(f"{member.display_name}"[:256],
+                      f"**{profile['credits']:,} credits** · Level {profile['level']} ({profile['xp']} XP)\n"
+                      f"**{len(copies)}** copies · " + " · ".join(f"{r.title()} {n}" for r, n in by_rarity.items()) + "\n"
+                      f"Duels {profile['wins']}W/{profile['losses']}L\n\n" + (lines or "No cards.")
+                      + (f"\n…and {len(copies) - 20} more (full list attached)." if len(copies) > 20 else ""))
+        await reply(interaction, embed=embed, file=discord.File(io.BytesIO(json.dumps(data, indent=2).encode()),
+                                                              filename=f"inventory-{member.id}.json"))
+
+    @app_commands.command(name="cancel-trades", description="Cancel a member's open trades and pending wagers")
+    async def cancel_trades(self, interaction, member: discord.Member):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        result = await self.bot.call("admin_cancel_trades", str(interaction.guild_id), str(member.id))
+        await reply(interaction, content=f"Cancelled {result['trades']} trade(s) and {result['wagers']} wager(s) for {member.mention}. "
+                                         "Escrowed cards went back to their owners.")
+
+    @app_commands.command(name="history", description="Recent gifts, grants, removals and credit changes")
+    async def history(self, interaction):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        events = await self.bot.call("admin_history", str(interaction.guild_id))
+        text = "\n".join(f"<t:{int(e['at'])}:R> · {e['text']}" for e in events) or "Nothing yet."
+        await reply(interaction, embed=panel("Admin history", text[:4000]))
 
     async def autocomplete_clear(self, interaction, current):
         if (interaction.guild_id != self.bot.settings.guild_id or interaction.user.bot
