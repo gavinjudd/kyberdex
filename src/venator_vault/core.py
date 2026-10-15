@@ -453,6 +453,7 @@ TRADE_MAX_OPEN = 3
 TRADE_DURATION = 3600
 GIFT_MAX = 10
 ADMIN_GRANT_MAX = 10
+ADMIN_CREDIT_MAX = 1_000_000_000_000
 
 
 class Game:
@@ -1696,6 +1697,133 @@ class Game:
             items = [self._mint(connection, guild_id, target_id, card["id"], now, "admin:" + admin_id) for _ in range(count)]
             record = self._record_transfer(connection, guild_id, "admin_grant", admin_id, None, target_id, items, now, request_id, note)
             return {**record, "replayed": False}
+
+    def admin_credits(self, guild_id, admin_id, target_id, amount, now=None, *, request_id=None, note=None):
+        """Server managers grant any positive number of credits; idempotent per request."""
+        now, guild_id, target_id = timestamp(now), str(guild_id), str(target_id)
+        if type(amount) is not int or not 1 <= amount <= ADMIN_CREDIT_MAX:
+            raise GameError("invalid_amount", f"Grant between 1 and {ADMIN_CREDIT_MAX:,} credits.")
+        reference = str(request_id) if request_id is not None else secrets.token_hex(8)
+        with self._tx() as connection:
+            granted = self._credit(connection, guild_id, target_id, amount, "admin_credits", reference, now)
+            return {"target_id": target_id, "amount": amount, "replayed": not granted, "admin_id": str(admin_id),
+                    "note": (str(note).strip()[:200] or None) if note else None,
+                    "credits": self._player(connection, guild_id, target_id)["credits"]}
+
+    def _admin_release(self, connection, guild_id, user_ids, instance_ids=None):
+        """Cancel open trades that involve these members (or these copies) so escrow returns cleanly."""
+        for row in connection.execute("SELECT id,a,b FROM trades WHERE guild_id=? AND status='open'", (guild_id,)).fetchall():
+            involved = row["a"] in user_ids or row["b"] in user_ids
+            if instance_ids is not None:
+                marks = ",".join("?" * len(instance_ids))
+                involved = bool(connection.execute(f"SELECT 1 FROM trade_items WHERE trade_id=? AND instance_id IN ({marks})",
+                                                   (row["id"], *instance_ids)).fetchone())
+            if involved:
+                self._close_trade(connection, row["id"], "cancelled")
+
+    def admin_take_cards(self, guild_id, admin_id, target_id, instance_ids, now=None, *, request_id=None):
+        """Remove specific copies from a member (any rarity). Undo with admin_restore_inventory."""
+        now, guild_id, target_id = timestamp(now), str(guild_id), str(target_id)
+        ids = list(dict.fromkeys(str(key) for key in instance_ids))
+        if not 1 <= len(ids) <= 25:
+            raise GameError("invalid_selection", "Choose 1–25 copies to remove.")
+        with self._tx() as connection:
+            self._expire(connection, now)
+            if request_id is not None:
+                prior = connection.execute("SELECT * FROM inventory_clears WHERE request_id=?", (str(request_id),)).fetchone()
+                if prior:
+                    return {**dict(prior), "instance_ids": json.loads(prior["instance_ids"]), "replayed": True, "cards": []}
+            items = [self._instance(connection, key, guild_id, target_id) for key in ids]
+            if connection.execute("""SELECT 1 FROM raid_members m JOIN raids r ON r.id=m.raid_id
+                    WHERE r.guild_id=? AND m.user_id=? AND r.status IN ('signup','active')""", (guild_id, target_id)).fetchone():
+                raise GameError("raid_active", "That member is in an active raid. Try again after it ends.")
+            self._admin_release(connection, guild_id, set(), ids)
+            for item in items:
+                for row in connection.execute("SELECT arena,instance_ids FROM decks WHERE guild_id=? AND user_id=?", (guild_id, target_id)).fetchall():
+                    deck = json.loads(row["instance_ids"])
+                    if item["id"] in deck:
+                        deck.remove(item["id"])
+                        connection.execute("UPDATE decks SET instance_ids=? WHERE guild_id=? AND user_id=? AND arena=?",
+                                           (json.dumps(deck), guild_id, target_id, row["arena"]))
+                connection.execute("UPDATE instances SET consumed_at=?,favorite=0,locked_by=NULL WHERE id=?", (now, item["id"]))
+            clear_id = secrets.token_hex(8)
+            connection.execute("INSERT INTO inventory_clears(id,guild_id,admin_id,target_id,instance_ids,created_at,request_id) VALUES(?,?,?,?,?,?,?)",
+                               (clear_id, guild_id, str(admin_id), target_id, json.dumps(ids), now,
+                                None if request_id is None else str(request_id)))
+            return {"id": clear_id, "target_id": target_id, "instance_ids": ids, "cards": [item["card"] for item in items],
+                    "replayed": False}
+
+    def admin_move_cards(self, guild_id, admin_id, from_id, to_id, instance_ids, now=None):
+        """Move copies between members regardless of favorites, decks or Celestial binding."""
+        now, guild_id, from_id, to_id = timestamp(now), str(guild_id), str(from_id), str(to_id)
+        if from_id == to_id:
+            raise GameError("same_member", "Choose two different members.")
+        ids = list(dict.fromkeys(str(key) for key in instance_ids))
+        if not 1 <= len(ids) <= 25:
+            raise GameError("invalid_selection", "Choose 1–25 copies to move.")
+        with self._tx() as connection:
+            self._expire(connection, now)
+            items = [self._instance(connection, key, guild_id, from_id) for key in ids]
+            self._admin_release(connection, guild_id, set(), ids)
+            for item in items:
+                item["locked_by"] = None
+                self._move_instance(connection, item, to_id)
+            return {"from_id": from_id, "to_id": to_id, "instance_ids": ids, "cards": [item["card"] for item in items]}
+
+    def admin_adjust_credits(self, guild_id, admin_id, target_id, *, remove=None, set_to=None, now=None, request_id=None):
+        """Remove credits (never below zero) or set an exact balance."""
+        now, guild_id, target_id = timestamp(now), str(guild_id), str(target_id)
+        with self._tx() as connection:
+            current = self._player(connection, guild_id, target_id)["credits"]
+            if set_to is not None:
+                if type(set_to) is not int or not 0 <= set_to <= ADMIN_CREDIT_MAX:
+                    raise GameError("invalid_amount", f"Set a balance from 0 to {ADMIN_CREDIT_MAX:,}.")
+                delta = set_to - current
+            else:
+                if type(remove) is not int or remove < 1:
+                    raise GameError("invalid_amount", "Remove at least 1 credit.")
+                delta = -min(remove, current)
+            reference = str(request_id) if request_id is not None else secrets.token_hex(8)
+            if delta:
+                self._credit(connection, guild_id, target_id, delta, "admin_adjust", reference, now)
+            return {"target_id": target_id, "before": current, "delta": delta,
+                    "credits": self._player(connection, guild_id, target_id)["credits"]}
+
+    def admin_cancel_trades(self, guild_id, target_id, now=None):
+        now, guild_id, target_id = timestamp(now), str(guild_id), str(target_id)
+        with self._tx() as connection:
+            self._expire(connection, now)
+            trades = connection.execute("SELECT COUNT(*) FROM trades WHERE guild_id=? AND status='open' AND (a=? OR b=?)",
+                                        (guild_id, target_id, target_id)).fetchone()[0]
+            self._admin_release(connection, guild_id, {target_id})
+            wagers = connection.execute("UPDATE wagers SET status='cancelled',resolved_at=? WHERE guild_id=? AND status='pending' AND (a=? OR b=?)",
+                                        (now, guild_id, target_id, target_id)).rowcount
+            return {"trades": trades, "wagers": wagers}
+
+    def admin_inspect(self, guild_id, target_id, now=None):
+        profile = self.profile(guild_id, target_id, now=now)
+        with contextlib.closing(self._connect()) as connection:
+            rows = connection.execute("""SELECT id,card_id,attack_roll,health_roll,favorite,locked_by,origin,acquired_at FROM instances
+                WHERE guild_id=? AND user_id=? AND consumed_at IS NULL ORDER BY acquired_at DESC""", (str(guild_id), str(target_id))).fetchall()
+        copies = [{"id": row["id"], "card_id": row["card_id"], "name": self.catalog[row["card_id"]]["name"],
+                   "rarity": self.catalog[row["card_id"]]["rarity"], "favorite": bool(row["favorite"]),
+                   "in_trade": bool(row["locked_by"]), "origin": row["origin"], "acquired_at": row["acquired_at"]} for row in rows]
+        return {"profile": profile, "copies": copies}
+
+    def admin_history(self, guild_id, limit=15):
+        with contextlib.closing(self._connect()) as connection:
+            transfers = connection.execute("SELECT kind,actor_id,from_id,to_id,card_ids,created_at FROM transfers WHERE guild_id=? ORDER BY created_at DESC LIMIT ?",
+                                           (str(guild_id), limit)).fetchall()
+            removals = connection.execute("SELECT id,admin_id,target_id,instance_ids,created_at,restored_at FROM inventory_clears WHERE guild_id=? ORDER BY created_at DESC LIMIT ?",
+                                          (str(guild_id), limit)).fetchall()
+            credits = connection.execute("""SELECT user_id,delta,reason,created_at FROM ledger WHERE guild_id=? AND reason IN ('admin_credits','admin_adjust')
+                ORDER BY created_at DESC LIMIT ?""", (str(guild_id), limit)).fetchall()
+        events = [{"at": r["created_at"], "text": f"{r['kind'].replace('_', ' ')}: {len(json.loads(r['card_ids']))} card(s) → <@{r['to_id']}>"
+                   + (f" from <@{r['from_id']}>" if r["from_id"] else f" by <@{r['actor_id']}>")} for r in transfers]
+        events += [{"at": r["created_at"], "text": f"removed {len(json.loads(r['instance_ids']))} card(s) from <@{r['target_id']}> by <@{r['admin_id']}> · ref `{r['id']}`"
+                    + (" · undone" if r["restored_at"] else "")} for r in removals]
+        events += [{"at": r["created_at"], "text": f"credits {r['delta']:+,} for <@{r['user_id']}>"} for r in credits]
+        return sorted(events, key=lambda e: e["at"], reverse=True)[:limit]
 
     def admin_clear_inventory(self, guild_id, admin_id, target_id, now=None, *, request_id=None):
         """Remove every active copy a member owns (server managers only); reversible.

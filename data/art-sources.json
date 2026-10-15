@@ -17,46 +17,49 @@
     "obi-wan-kenobi": {
       "path": "assets/art/obi-wan-kenobi.png",
       "subject_id": "obi-wan-kenobi",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/obi-wan-kenobi",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-ltlvt6_8ab74885.jpeg?region=0%2C0%2C1200%2C675",
-      "source_raw_sha256": "e655c74b7038d53a53aca292dba4e3284e595e135fca782f380b995fa8b83dfb",
-      "pixel_sha256": "62c3bcdc5a39531eedc660826c8b106ebd619a890d7d20e3758d6d1524d5a742",
-      "reviewed_sha256": "d82d6242d20e6b02ae43b8130b9b6b99de894ef3d25111904ae3f852e938bdb6",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/628cdaa1dbbde50001de0bd3-image_6c311046.jpeg",
+      "source_raw_sha256": "e3c70aedb1904a17f57ada2834a42164ecbabac15bb9f913344f68193adb9cf9",
+      "pixel_sha256": "a7aa64dd6b12737e6464e1f278676d092802c711847b445e26e7c7927ca43cb4",
+      "reviewed_sha256": "e0500b0bf811120d2befcb668b6a80ee4816ba8308f311c9f966c894fe181a79",
       "normalization": {
-        "crop_box": [
-          700,
-          60,
-          1190,
-          675
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          64,
-          326,
-          960,
-          910
-        ],
-        "placement_size": [
-          465,
-          584
-        ],
-        "placement_xy": [
-          279,
-          326
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            779
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          200,
+          0,
+          1336,
+          864
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "anakin-skywalker": {
       "path": "assets/art/anakin-skywalker.png",
@@ -1036,14 +1039,16 @@
     "chewbacca": {
       "path": "assets/art/chewbacca.png",
       "subject_id": "chewbacca",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/chewbacca",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-1ftchc_83f6c171.jpeg?region=0%2C0%2C1200%2C674",
-      "source_raw_sha256": "c38d83bfeaf441aaaaa3a21c3d0201cc8771d0347a47fa7d511298d13afb25a5",
-      "pixel_sha256": "7c70ef927494219be6f1a11432d5ba0daaf1dddb7401e03c7c70385857b6e054",
-      "reviewed_sha256": "152ba227058dfa6dc1249c318f9d917eb3a57284981d687e9f4ebe5e618684d0",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/chewbacca-bio-19_a4ce2aeb.jpeg",
+      "source_raw_sha256": "0f54da35dc52a535eafc3704d46feeb8ae9d01dead967a6fd1ab9d6ce86b13cc",
+      "pixel_sha256": "4bc00c0c03bc1ff0dcf6da548d8a7478332a9000547d5e52116f34bcd10cd87e",
+      "reviewed_sha256": "7d7e04a31e1ca51907baa6e8bd9f876fb7133fde32e0f854d12c1e8acdf819e0",
       "normalization": {
         "crop_center": [
           0.5,
@@ -1057,11 +1062,11 @@
         "placement": {
           "xy": [
             0,
-            100
+            0
           ],
           "size": [
-            1024,
-            972
+            830,
+            1180
           ],
           "matte_rgb": [
             4,
@@ -1070,15 +1075,13 @@
           ]
         },
         "requested_crop_box": [
-          160,
+          300,
           0,
-          870,
-          674
+          900,
+          853
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "darth-vader": {
       "path": "assets/art/darth-vader.png",
@@ -2231,46 +2234,49 @@
     "malevolence": {
       "path": "assets/art/malevolence.png",
       "subject_id": "malevolence",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/malevolence",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_malevolence_01_169_221c369f.jpeg?region=0%2C0%2C1560%2C878",
-      "source_raw_sha256": "ff7b22c8c470884a98ddd9b189ce5fae53c3ca65d8b9966249c8a7d446647d58",
-      "pixel_sha256": "6d507664d870571d99f77e5038a4596cf53dd07afb705fd26db000bab7002c52",
-      "reviewed_sha256": "fd5201860c16eb37b3b4bf15929b64c5848332f82bdc3cd3407fbcdc04b71e4e",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_malevolence_01_169_221c369f.jpeg",
+      "source_raw_sha256": "87a258983e2d7a50f7711863edab93c521bd170fc5dc0c28063ef311c9cbcf24",
+      "pixel_sha256": "0ba62e94d0c8bd727557f905030283fdd75a7722ac67bea8d4c6cab97d9a7deb",
+      "reviewed_sha256": "cb4381ff38165dd1eca5d935c4ca7187c7323e0e52f20e50c0089492a12cd7b6",
       "normalization": {
-        "crop_box": [
+        "crop_center": [
+          0.5,
+          0.5
+        ],
+        "fit_mode": "contain",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            576
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
           0,
           0,
           1560,
           878
-        ],
-        "brightness": 1.0,
-        "foreground_window": [
-          64,
-          326,
-          960,
-          910
-        ],
-        "placement_size": [
-          896,
-          504
-        ],
-        "placement_xy": [
-          64,
-          366
-        ],
-        "canvas": [
-          1024,
-          1536
-        ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "imperial-class": {
       "path": "assets/art/imperial-class.png",
@@ -2322,46 +2328,49 @@
     "executor": {
       "path": "assets/art/executor.png",
       "subject_id": "executor",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/executor",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_executor_01_169_8157df82.jpeg?region=57%2C0%2C1503%2C845",
-      "source_raw_sha256": "2dd9860a9a928607036f8363cd4550bd23c5680b726ddf54aa7a2a86767b3520",
-      "pixel_sha256": "c0f3dbc79d88b01cf1d2d824db56dd67e4088f6a8ad64efbdbc491e7cd9ad765",
-      "reviewed_sha256": "847565275931cec213592ce1f8db3470143478a270176964f9060f80b6d426ed",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_superstardestroyer_01_169_d5757b90.jpeg",
+      "source_raw_sha256": "313c89d427b1e75c91d834c0009613c638968ea1c81335e9e92ad5535081fdff",
+      "pixel_sha256": "52185739c5ba143da6fb72bc2310e397b3cee915deb6508b601fff3c154c4dbe",
+      "reviewed_sha256": "e926f10657536aeb22a2cc3f4efe81a8b283a0861c5a91d5955ec192cb71f672",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1503,
-          845
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          64,
-          326,
-          960,
-          910
-        ],
-        "placement_size": [
-          896,
-          504
-        ],
-        "placement_xy": [
-          64,
-          366
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            576
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          1560,
+          878
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "death-star": {
       "path": "assets/art/death-star.png",
@@ -24418,14 +24427,16 @@
     "sith-star-destroyer": {
       "path": "assets/art/sith-star-destroyer.png",
       "subject_id": "sith-star-destroyer",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/sith-star-destroyer",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/sith-star-destroyer-main_1c1712bb.jpeg?region=329%2C0%2C951%2C536",
-      "source_raw_sha256": "5e5872737c828b15f606df2ea7c6fd4469cea5206f52d98636fbcc59cf44c6b7",
-      "pixel_sha256": "801dbe0b6013528c5b058a5ef2b1488126461cb377718b50c3f547fd0c35af2b",
-      "reviewed_sha256": "6fc66b279f756f7eccda294a7379dca3f8776223b6229ef111ac1018838478f1",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/tlj-db-first-order-star-destroyer-main-image-2_99142f23.jpeg",
+      "source_raw_sha256": "d118d128e6d3b2b32556b215dc991e8e4cc3bb4f82cecc0f81467cab4548f345",
+      "pixel_sha256": "e8cb508462d04f1c857e185ed933e88125f29af7a57e48b7c3d88495352310d0",
+      "reviewed_sha256": "30ed82b46e89f7f4dcde1ccadd54d3b9c1b817d0a26ec2749941af61cb082a76",
       "normalization": {
         "crop_center": [
           0.5,
@@ -24439,11 +24450,11 @@
         "placement": {
           "xy": [
             0,
-            160
+            0
           ],
           "size": [
             1024,
-            577
+            576
           ],
           "matte_rgb": [
             4,
@@ -24454,13 +24465,11 @@
         "requested_crop_box": [
           0,
           0,
-          951,
-          536
+          768,
+          432
         ]
       },
-      "recipe": "official-source-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "star-commuter-shuttle": {
       "path": "assets/art/star-commuter-shuttle.png",
@@ -25662,46 +25671,49 @@
     "tie-bomber": {
       "path": "assets/art/tie-bomber.png",
       "subject_id": "tie-bomber",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/tie-bomber",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/tie-bomber-main_d4d9b979.jpeg?region=424%2C0%2C632%2C356",
-      "source_raw_sha256": "7d46c69b5f90c00a43d92a352b2fb53c3647d5337a9ec1adfb1ff4d903f561ec",
-      "pixel_sha256": "14191842a03708dcc1bbaa1a470695cf139ba94b1e3853943c528a9bb6b8aced",
-      "reviewed_sha256": "29b0df1eb99d223ef039ab449ab99b593e609240219b854a26ca1eeba3396c16",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/ep5_key_504_6c3982bb.jpeg",
+      "source_raw_sha256": "d632be89cb53360867d9ef700f0a84c509f8d5dd442746bfda722a1791637a80",
+      "pixel_sha256": "82eb88fec278e5648ec6880edf81bc70f4da692b529889c6043abf5e7befaa33",
+      "reviewed_sha256": "dbfee8da129ac5bd4e7ea1039b7ff02429986dcede984a2bd4673d57e02af567",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          632,
-          356
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          534
-        ],
-        "placement_xy": [
-          38,
-          390
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            528
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          100,
+          1280,
+          760
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "tie-brute": {
       "path": "assets/art/tie-brute.png",
@@ -26504,46 +26516,49 @@
     "count-dooku-s-speeder": {
       "path": "assets/art/count-dooku-s-speeder.png",
       "subject_id": "count-dooku-s-speeder",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/count-dookus-speeder",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/count-dookus-speeder_099a9e27.jpeg?region=472%2C0%2C2896%2C1629",
-      "source_raw_sha256": "5f45aaba33a97216fa2a9044a747a6ff3d4422244fa5ab455d4cb66adb54dcf9",
-      "pixel_sha256": "dc530f286726b29215bd72de0406a75c43353b6d74c681624c18b851a413290e",
-      "reviewed_sha256": "ca53ac6a29cac8cda83834bb730cbc503675612e614345226816206b01d815f4",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/count-dookus-speeder_099a9e27.jpeg",
+      "source_raw_sha256": "520292f025d167edbd91cda9169d27c90fec02ecb731e09948ebd97784689fb7",
+      "pixel_sha256": "6f889fa9e5fd6dfbdb1a028734ac92af53e25bf7c6e9cd2b5540950a6b8ec21a",
+      "reviewed_sha256": "1c95727da19a7e0b7a18c9b8941d09a6ddce2a4dc05c5d5c508c99f60106c962",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          2896,
-          1629
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          533
-        ],
-        "placement_xy": [
-          38,
-          391
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            869
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          960,
+          0,
+          2880,
+          1629
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "yoda-s-fighter": {
       "path": "assets/art/yoda-s-fighter.png",
@@ -29338,46 +29353,49 @@
     "first-light": {
       "path": "assets/art/first-light.png",
       "subject_id": "first-light",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/first-light",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/solo-db-first-light-main-image_20f4368c.jpeg?region=252%2C0%2C1276%2C718",
-      "source_raw_sha256": "10f131b2bddac9bdcfb262fae4bb70be911d41fd9969590915820a0393f5ce17",
-      "pixel_sha256": "4a6cc720f3f349139cfa9b9f3a0fdb4ca3c8c127e6cfa93ff7a7214457a90650",
-      "reviewed_sha256": "71a0ea1cb76e225f1430afcbd54c46f2284aaf0be8d49dd856bec03c4f9db558",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/sws_behanthescenes_thumb_fbf323c1.jpeg",
+      "source_raw_sha256": "7acd4b084462596e52002c54fbc043a58d7f1e77c3c47cb7e7536b8fe8f5760c",
+      "pixel_sha256": "e68f724c71e4b886f871b101e68a8053b1bb7332c0d941bf36ba39386292931f",
+      "reviewed_sha256": "680990e76f23ed423f3744f290dcc0a87af9d24e68696ccdd6c897111c050888",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1276,
-          718
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          533
-        ],
-        "placement_xy": [
-          38,
-          391
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            576
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          1920,
+          1080
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "first-order-transporter": {
       "path": "assets/art/first-order-transporter.png",
@@ -31670,46 +31688,49 @@
     "brain-worm": {
       "path": "assets/art/brain-worm.png",
       "subject_id": "brain-worm",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/brain-worm",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/brain-worm_b3368a19.jpeg?region=0%2C0%2C1560%2C878",
-      "source_raw_sha256": "44430b26b0d9dc961f02186c8b3a7f80a2ef076c15a606d635593643fc56fe81",
-      "pixel_sha256": "c2e4a66cdfa867b140a897b649477cbd6b787b5b90a07a6e6a19af58d0668aaf",
-      "reviewed_sha256": "c5654cc11e5f5277d340e2e287e7e779d74f6fb4b64ad11fd1035ed6f4845a8d",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/brain-worm_b3368a19.jpeg",
+      "source_raw_sha256": "56e2e13a870fe4981b20d06660fc83dae6c445ac953a69e826e957c908c724ea",
+      "pixel_sha256": "601b1c1600320c96690af1118b7b449b7bdfa873586ab4b051d692fe046b744a",
+      "reviewed_sha256": "1780fa49c62e9f6fe601e0fabc5dbd7547482bd7055f64cc688295b4758e8b31",
       "normalization": {
-        "crop_box": [
+        "crop_center": [
+          0.5,
+          0.5
+        ],
+        "fit_mode": "contain",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            576
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
           0,
           0,
           1560,
           878
-        ],
-        "brightness": 1.0,
-        "foreground_window": [
-          38,
-          338,
-          986,
-          977
-        ],
-        "placement_size": [
-          948,
-          534
-        ],
-        "placement_xy": [
-          38,
-          390
-        ],
-        "canvas": [
-          1024,
-          1536
-        ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "brezak": {
       "path": "assets/art/brezak.png",
@@ -34326,46 +34347,49 @@
     "falcon-asteroid-field": {
       "path": "assets/art/falcon-asteroid-field.png",
       "subject_id": "millennium-falcon",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/news/from-a-certain-point-of-view-whats-the-best-scene-in-star-was-the-empire-strikes-back",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/image_38932027.jpeg",
-      "source_raw_sha256": "56a1048f030ea2721d44e64a3efdf0dbad0f368aabe8f69b3ab8781a775c558f",
-      "pixel_sha256": "48e26511e2e976d717cf52984c4bc94a2873d04c5aad3765c98ee51dee2c821a",
-      "reviewed_sha256": "49ae45b8dbfad894c29a991430b6ce66eb5224317a1be703b7b297cdd83ebe82",
+      "source_page_url": "https://www.starwars.com/databank/millennium-falcon",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/falcon-bio-gallery-9_b0a4f931.jpeg",
+      "source_raw_sha256": "7d944818fde95311669741463f85ac6820d944cdeb982256805ea77091fd41bb",
+      "pixel_sha256": "ba98866603e4271cbb7ec27cbc7bd0337935db457a022ceaf7b901eb57e93c62",
+      "reviewed_sha256": "f4626ec9385d7a41349e5f1849f9a499d07c425f3cba8c0963f254a02e22a763",
       "normalization": {
-        "crop_box": [
-          190,
-          0,
-          1010,
-          535
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          64,
-          326,
-          960,
-          910
-        ],
-        "placement_size": [
-          895,
-          584
-        ],
-        "placement_xy": [
-          64,
-          326
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            582
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          200,
+          60,
+          1397,
+          740
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "rex-rishi": {
       "path": "assets/art/rex-rishi.png",
@@ -34555,46 +34579,49 @@
     "deathstar-yavin": {
       "path": "assets/art/deathstar-yavin.png",
       "subject_id": "death-star",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
-      "source_page_url": "https://www.starwars.com/news/star-wars-inside-intel-the-death-star",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/image_06befcb6.jpeg",
-      "source_raw_sha256": "381c19210147b21d878cbe77ac5c5649c48cffbda16133e67a5254fd524572fe",
-      "pixel_sha256": "58d9157e125dba8f8f478e9a1ecd69b09e019cac3eff6a285fce4030cdd773dd",
-      "reviewed_sha256": "6754a777a423cf21d66df62b0121597bb0f051cd08ba4aeb28e4c368d9e72bba",
+      "source_page_url": "https://www.starwars.com/databank/death-star",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/d957ff01a9684c4d441be32bc7d16ef61bd40596_1_d957ff01.jpeg",
+      "source_raw_sha256": "01881735d359febc5307313dc085fdc7e9104af815e6152d11286aa11829563b",
+      "pixel_sha256": "7f350be3c8103b6c86e5ee5faae38537a603496ed507d6c81d2d24c70f217b82",
+      "reviewed_sha256": "d5f62865b49a3ed825329e49e33abea09d5080aebeb4869131d00ec3b76daeef",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1280,
-          536
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          64,
-          326,
-          960,
-          910
-        ],
-        "placement_size": [
-          896,
-          375
-        ],
-        "placement_xy": [
-          64,
-          430
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            861
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          1100,
+          200,
+          3300,
+          2050
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "dagan-gera": {
       "path": "assets/art/dagan-gera.png",
@@ -35329,46 +35356,49 @@
     "executor-summer-2027": {
       "path": "assets/art/executor.png",
       "subject_id": "executor",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/executor",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_executor_01_169_8157df82.jpeg?region=57%2C0%2C1503%2C845",
-      "source_raw_sha256": "2dd9860a9a928607036f8363cd4550bd23c5680b726ddf54aa7a2a86767b3520",
-      "pixel_sha256": "c0f3dbc79d88b01cf1d2d824db56dd67e4088f6a8ad64efbdbc491e7cd9ad765",
-      "reviewed_sha256": "847565275931cec213592ce1f8db3470143478a270176964f9060f80b6d426ed",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_superstardestroyer_01_169_d5757b90.jpeg",
+      "source_raw_sha256": "313c89d427b1e75c91d834c0009613c638968ea1c81335e9e92ad5535081fdff",
+      "pixel_sha256": "52185739c5ba143da6fb72bc2310e397b3cee915deb6508b601fff3c154c4dbe",
+      "reviewed_sha256": "e926f10657536aeb22a2cc3f4efe81a8b283a0861c5a91d5955ec192cb71f672",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1503,
-          845
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          64,
-          326,
-          960,
-          910
-        ],
-        "placement_size": [
-          896,
-          504
-        ],
-        "placement_xy": [
-          64,
-          366
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            576
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          1560,
+          878
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "darth-vader-the-hallway": {
       "path": "assets/art/darth-vader.png",
@@ -35574,46 +35604,49 @@
     "obi-wan-kenobi-the-negotiator": {
       "path": "assets/art/obi-wan-kenobi.png",
       "subject_id": "obi-wan-kenobi",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/obi-wan-kenobi",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-ltlvt6_8ab74885.jpeg?region=0%2C0%2C1200%2C675",
-      "source_raw_sha256": "e655c74b7038d53a53aca292dba4e3284e595e135fca782f380b995fa8b83dfb",
-      "pixel_sha256": "62c3bcdc5a39531eedc660826c8b106ebd619a890d7d20e3758d6d1524d5a742",
-      "reviewed_sha256": "d82d6242d20e6b02ae43b8130b9b6b99de894ef3d25111904ae3f852e938bdb6",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/628cdaa1dbbde50001de0bd3-image_6c311046.jpeg",
+      "source_raw_sha256": "e3c70aedb1904a17f57ada2834a42164ecbabac15bb9f913344f68193adb9cf9",
+      "pixel_sha256": "a7aa64dd6b12737e6464e1f278676d092802c711847b445e26e7c7927ca43cb4",
+      "reviewed_sha256": "e0500b0bf811120d2befcb668b6a80ee4816ba8308f311c9f966c894fe181a79",
       "normalization": {
-        "crop_box": [
-          700,
-          60,
-          1190,
-          675
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          64,
-          326,
-          960,
-          910
-        ],
-        "placement_size": [
-          465,
-          584
-        ],
-        "placement_xy": [
-          279,
-          326
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            779
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          200,
+          0,
+          1336,
+          864
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "ahsoka-tano-the-white": {
       "path": "assets/art/ahsoka-tano.png",
@@ -36039,46 +36072,49 @@
     "executor-vaders-flagship": {
       "path": "assets/art/executor.png",
       "subject_id": "executor",
+      "status": "available",
+      "rights_status": "unverified",
       "width": 1024,
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/databank/executor",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_executor_01_169_8157df82.jpeg?region=57%2C0%2C1503%2C845",
-      "source_raw_sha256": "2dd9860a9a928607036f8363cd4550bd23c5680b726ddf54aa7a2a86767b3520",
-      "pixel_sha256": "c0f3dbc79d88b01cf1d2d824db56dd67e4088f6a8ad64efbdbc491e7cd9ad765",
-      "reviewed_sha256": "847565275931cec213592ce1f8db3470143478a270176964f9060f80b6d426ed",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_superstardestroyer_01_169_d5757b90.jpeg",
+      "source_raw_sha256": "313c89d427b1e75c91d834c0009613c638968ea1c81335e9e92ad5535081fdff",
+      "pixel_sha256": "52185739c5ba143da6fb72bc2310e397b3cee915deb6508b601fff3c154c4dbe",
+      "reviewed_sha256": "e926f10657536aeb22a2cc3f4efe81a8b283a0861c5a91d5955ec192cb71f672",
       "normalization": {
-        "crop_box": [
-          0,
-          0,
-          1503,
-          845
+        "crop_center": [
+          0.5,
+          0.5
         ],
-        "brightness": 1.0,
-        "foreground_window": [
-          64,
-          326,
-          960,
-          910
-        ],
-        "placement_size": [
-          896,
-          504
-        ],
-        "placement_xy": [
-          64,
-          366
-        ],
-        "canvas": [
+        "fit_mode": "contain",
+        "output_size": [
           1024,
           1536
         ],
-        "fit_mode": "contain",
-        "feather_px": 10
+        "placement": {
+          "xy": [
+            0,
+            0
+          ],
+          "size": [
+            1024,
+            576
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          0,
+          0,
+          1560,
+          878
+        ]
       },
-      "recipe": "published-window-v1",
-      "status": "available",
-      "rights_status": "unverified"
+      "recipe": "official-source-v1"
     },
     "supremacy-mega-flagship": {
       "path": "assets/art/the-supremacy.png",

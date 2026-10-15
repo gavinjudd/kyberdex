@@ -62,11 +62,11 @@ Prefer to clone the repository and configure it yourself? The [manual setup guid
 | `/vault profile`, `/vault daily`, `/vault market` | View progress, collect free credits and review the daily market. |
 | `/vault recipes`, `/vault craft`, `/vault salvage` | Inspect costs and confirm exactly which copies are consumed. |
 | `/vault trade`, `/vault give` | Swap cards (one-sided offers fine; your partner is pinged) or gift them outright. |
-| `/vault gamble` | Coin flips, Kessel Run slots and member wagers, using credits only. |
+| `/vault gamble` | Coin flips, Kessel Run slots and member wagers, using credits only. Results post publicly. |
 | `/vault deck`, `/vault duel` | Save Ground/Fleet squads and challenge another collector. |
 | `/vault raid` | Inspect a cooperative encounter, join a squad or attack. |
 | `/vault complain` | Send a private report to the server's bot managers. |
-| `/vault-admin setup`, `pause`, `spawn`, `event`, `raid`, `health`, `complaints`, `failed-names`, `give`, `clear-inventory`, `gambling` | Server management; requires **Manage Server**. |
+| `/vault-admin setup`, `pause`, `spawn`, `event`, `raid`, `health`, `complaints`, `failed-names`, `give`, `credits`, `take`, `move`, `take-credits`, `set-credits`, `inspect`, `cancel-trades`, `history`, `clear-inventory`, `restore-inventory`, `gambling` | Server management; requires **Manage Server**. |
 
 Read [gameplay, odds and capture rules](docs/GAMEPLAY.md) for details. Administrative forced spawns and event starts are explicit exceptions to automatic activity scheduling.
 
