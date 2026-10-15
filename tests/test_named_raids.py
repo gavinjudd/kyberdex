@@ -180,7 +180,7 @@ def test_v4_migration_preserves_active_generic_raid(game):
         db.execute('PRAGMA user_version=4')
     restarted=Game(game.db_path,game.catalog_path)
     saved=restarted.get_raid(raid['id'],now=110)
-    assert restarted.health()['schema_version']==7
+    assert restarted.health()['schema_version']==8
     assert saved['boss'] is None and saved['participants'][0]['combat'] is None
     assert saved['max_hp']==math.ceil(310*3*.85)
     for when in (110,120,130):

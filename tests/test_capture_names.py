@@ -76,7 +76,7 @@ def test_owned_card_lookup_and_choices_are_scoped_and_current(game):
 
 def test_all_printed_names_and_registered_nicknames_are_accepted(game):
     from venator_vault.core import normalize_alias
-    assert len(game.catalog) == 851
+    assert len(game.catalog) == 871
     for key, card in game.catalog.items():
         for answer in [card['name'], *card['aliases']]:
             assert normalize_alias(answer) in game.capture_names[key], (key, answer)

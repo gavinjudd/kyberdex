@@ -112,5 +112,5 @@ def test_every_printed_name_and_reviewed_alias_remains_valid_with_only_deliberat
     for key, answers in game.capture_names.items():
         for answer in answers:
             assert len(identities[answer]) == 1 or answer == normalize_alias(game.catalog[key]["name"]), (key, answer)
-    assert len(game.catalog) == 851
+    assert len(game.catalog) == 871
     assert game.catalog["b1-series-rocket-battle-droid"]["subject_id"] != game.catalog["b1-battle-droid"]["subject_id"]

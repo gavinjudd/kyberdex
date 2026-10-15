@@ -233,6 +233,88 @@ class CoreTests(unittest.TestCase):
         trade = self.game.trade_offer(trade["id"],"b",[right["id"]],now=self.now)
         return left,right,trade
 
+    def test_one_sided_trade_completes_as_gift(self):
+        left = self.seed_inventory("a")
+        trade = self.game.trade_create("guild","a","b",now=self.now)
+        trade = self.game.trade_offer(trade["id"],"a",[left["id"]],now=self.now)
+        self.game.trade_accept(trade["id"],"a",trade["version"],now=self.now)
+        done = self.game.trade_accept(trade["id"],"b",trade["version"],now=self.now)
+        self.assertEqual(done["status"],"completed")
+        self.assertEqual(self.game.info("guild","b",left["id"])["user_id"],"b")
+
+    def test_empty_trade_cannot_be_confirmed(self):
+        trade = self.game.trade_create("guild","a","b",now=self.now)
+        self.assert_error("empty_trade",self.game.trade_accept,trade["id"],"a",trade["version"],now=self.now)
+
+    def test_parallel_trades_and_same_pair_reopens(self):
+        first = self.game.trade_create("guild","a","b",now=self.now)
+        again = self.game.trade_create("guild","b","a",now=self.now)
+        self.assertEqual(first["id"],again["id"])
+        self.assertTrue(again["reopened"])
+        self.game.trade_create("guild","a","c",now=self.now)
+        self.game.trade_create("guild","a","d",now=self.now)
+        self.assert_error("active_trade",self.game.trade_create,"guild","a","e",now=self.now)
+        self.game.trade_create("guild","b","e",now=self.now)
+
+    def test_trade_allows_deck_and_favorite_cards_and_clears_them(self):
+        item = self.seed_inventory("a")
+        self.game.set_deck("guild","a","ground",[item["id"]],now=self.now)
+        self.game.set_favorite("guild","a",item["id"],True)
+        trade = self.game.trade_create("guild","a","b",now=self.now)
+        trade = self.game.trade_offer(trade["id"],"a",[item["id"]],now=self.now)
+        self.game.trade_accept(trade["id"],"a",trade["version"],now=self.now)
+        self.game.trade_accept(trade["id"],"b",trade["version"],now=self.now)
+        moved = self.game.info("guild","b",item["id"])
+        self.assertFalse(moved["favorite"])
+        self.assertEqual(self.game.deck("guild","a","ground")["cards"],[])
+
+    def test_give_moves_cards_once_and_records_transfer(self):
+        item = self.seed_inventory("a")
+        self.game.set_deck("guild","a","ground",[item["id"]],now=self.now)
+        result = self.game.give("guild","a","b",[item["id"]],now=self.now,request_id="r1",note="gg")
+        self.assertEqual(result["to_id"],"b")
+        self.assertEqual(self.game.info("guild","b",item["id"])["user_id"],"b")
+        self.assertEqual(self.game.deck("guild","a","ground")["cards"],[])
+        replay = self.game.give("guild","a","b",[item["id"]],now=self.now,request_id="r1")
+        self.assertTrue(replay["replayed"])
+        self.assert_error("not_owned",self.game.give,"guild","a","b",[item["id"]],now=self.now)
+        self.assert_error("self_gift",self.game.give,"guild","b","b",[item["id"]],now=self.now)
+        self.assertEqual(self.game.transfers("guild")[0]["kind"],"gift")
+
+    def test_give_rejects_escrowed_cards(self):
+        item = self.seed_inventory("a")
+        trade = self.game.trade_create("guild","a","c",now=self.now)
+        self.game.trade_offer(trade["id"],"a",[item["id"]],now=self.now)
+        self.assert_error("escrow_locked",self.game.give,"guild","a","b",[item["id"]],now=self.now)
+
+    def test_admin_grant_mints_and_respects_edition_caps(self):
+        result = self.game.admin_grant("guild","admin","b","echo",3,now=self.now,request_id="g1")
+        self.assertEqual(len(result["instance_ids"]),3)
+        self.assertEqual(len(self.game.inventory("guild","b")),3)
+        self.assertTrue(self.game.admin_grant("guild","admin","b","echo",3,now=self.now,request_id="g1")["replayed"])
+        self.assertEqual(len(self.game.inventory("guild","b")),3)
+        self.assert_error("unavailable_card",self.game.admin_grant,"guild","admin","b","limited",5,now=self.now)
+        self.game.admin_grant("guild","admin","b","limited",4,now=self.now)
+        self.assert_error("invalid_count",self.game.admin_grant,"guild","admin","b","echo",11,now=self.now)
+
+    def test_admin_clear_inventory_cancels_trades_and_can_be_undone(self):
+        keep = self.seed_inventory("a")
+        other = self.seed_inventory("a","bravo")
+        self.game.set_deck("guild","a","ground",[keep["id"]],now=self.now)
+        trade = self.game.trade_create("guild","a","b",now=self.now)
+        self.game.trade_offer(trade["id"],"a",[other["id"]],now=self.now)
+        result = self.game.admin_clear_inventory("guild","admin","a",now=self.now,request_id="c1")
+        self.assertEqual(sorted(result["instance_ids"]),sorted([keep["id"],other["id"]]))
+        self.assertEqual(self.game.inventory("guild","a"),[])
+        self.assertEqual(self.game.get_trade(trade["id"])["status"],"cancelled")
+        self.assertEqual(self.game.deck("guild","a","ground")["cards"],[])
+        self.assertTrue(self.game.admin_clear_inventory("guild","admin","a",now=self.now,request_id="c1")["replayed"])
+        restored = self.game.admin_restore_inventory("guild","admin",result["id"],now=self.now+5)
+        self.assertEqual(restored["restored"],2)
+        self.assertEqual(len(self.game.inventory("guild","a")),2)
+        self.assert_error("already_restored",self.game.admin_restore_inventory,"guild","admin",result["id"])
+        self.assert_error("unknown_clear",self.game.admin_restore_inventory,"other-guild","admin",result["id"])
+
     def test_trade_requires_two_explicit_accepts_and_atomic_ownership(self):
         left,right,trade = self.prepare_trade()
         first = self.game.trade_accept(trade["id"],"a",trade["version"],now=self.now)
@@ -269,7 +351,7 @@ class CoreTests(unittest.TestCase):
     def test_trade_expiry_and_restart_return_assets_without_transfer(self):
         left,right,trade = self.prepare_trade()
         restarted = core.Game(self.db_path,self.catalog_path)
-        self.assertEqual(restarted.get_trade(trade["id"],now=self.now+901)["status"],"expired")
+        self.assertEqual(restarted.get_trade(trade["id"],now=self.now+3601)["status"],"expired")
         self.assertIsNone(restarted.info("guild","a",left["id"])["locked_by"])
         self.assertIsNone(restarted.info("guild","b",right["id"])["locked_by"])
 

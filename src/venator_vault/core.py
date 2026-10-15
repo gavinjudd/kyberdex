@@ -22,7 +22,10 @@ from collections import Counter
 from pathlib import Path
 
 RARITIES = ("common", "uncommon", "rare", "epic", "legendary", "mythic")
-VALUES = dict(zip(RARITIES, (20, 40, 80, 160, 320, 640)))
+# Celestial sits above Mythic: staff-granted only, never drops, sold, crafted or traded.
+STAFF_RARITY = "celestial"
+ALL_RARITIES = RARITIES + (STAFF_RARITY,)
+VALUES = dict(zip(ALL_RARITIES, (20, 40, 80, 160, 320, 640, 1280)))
 ARENAS = ("ground", "fleet")
 ROLES = ("striker", "guardian", "support", "tactician")
 NEUTRAL_FACTIONS = frozenset(("Independent", "Wildlife"))
@@ -51,6 +54,10 @@ SPAWN_WEIGHTS_V3_REVISION_2 = dict(zip(RARITIES, (5090, 2500, 1800, 420, 150, 40
 LEGACY_SPAWN_WEIGHTS = dict(zip(RARITIES, (5800, 2500, 1000, 500, 150, 50)))
 LIMITED_SHARE_PERCENT = 25
 WRONG_COOLDOWN = 3
+STREAK_RELIEF = 90
+STARTER_CREDITS = 250
+STARTER_CARDS = 3
+CAPTURE_NAME_MATCHER_VERSION = "capture-names-v2"
 CRAFT_RECIPES = {
     "uncommon": {"ingredients": 3, "cost": 150},
     "rare": {"ingredients": 3, "cost": 150},
@@ -58,7 +65,7 @@ CRAFT_RECIPES = {
     "legendary": {"ingredients": 5, "cost": 750},
     "mythic": {"ingredients": 7, "cost": 2000},
 }
-RARITY_POWER = dict(zip(RARITIES,(1.0,1.25,1.65,2.3,3.2,4.5)))
+RARITY_POWER = dict(zip(ALL_RARITIES,(1.0,1.25,1.65,2.3,3.2,4.5,7.0)))
 COMBAT_POWER_POINTS = {1:100,2:140,3:200,4:290,5:420}
 ROLE_BASELINES = {"striker":(120,480,70),"guardian":(90,640,45),"support":(96,600,55),"tactician":(108,533,80)}
 POWER_PROFILE_BASES = frozenset(("default_design", "curated_design", "depiction_override"))
@@ -75,6 +82,8 @@ def _is_event_exclusive(card):
 def collector_limit(card):
     """Published default capacity; explicit 1–6 overrides belong to events."""
     rarity = card.get("rarity")
+    if rarity == STAFF_RARITY:
+        return 1
     if not isinstance(rarity, str) or rarity not in COLLECTOR_LIMITS:
         raise ValueError("Unknown rarity in collector policy")
     limit = COLLECTOR_LIMITS[rarity]
@@ -129,7 +138,7 @@ NAME_TITLES = frozenset((
     "prince", "lord", "lady", "darth", "jedi", "sith", "master", "knight", "padawan", "count",
     "moff", "director", "doctor", "dr", "professor", "clone", "trooper", "the", "agent", "boss",
     "chief", "commandant", "duchess", "governor", "inspector", "keeper", "leader", "magistrate",
-    "mother", "nightsister", "old", "taskmaster", "vice-chair", "arc", "pilot",
+    "mother", "nightsister", "old", "taskmaster", "vice-chair", "arc", "pilot", "minister",
 ))
 GENERIC_NAME_PARTS = NAME_TITLES | frozenset((
     "of", "and", "a", "an", "class", "star", "destroyer", "starfighter", "fighter", "interceptor",
@@ -148,6 +157,30 @@ CAPTURE_MODEL_FAMILIES = {
     "super-battle-droid-rocket-trooper": "b2-super-battle-droid",
 }
 GENERIC_CAPTURE_ANSWERS = frozenset(("battledroid",))
+POSSESSIVE_ADJECTIVES = frozenset(("modified", "custom", "personal", "upgraded", "old", "new"))
+FUZZY_MIN_LENGTH = 6
+
+
+def edit_distance(left, right, limit):
+    """Damerau-Levenshtein (adjacent swaps) with an early exit above limit."""
+    if abs(len(left)-len(right)) > limit:
+        return limit+1
+    previous2, previous = None, list(range(len(right)+1))
+    for i, a in enumerate(left, 1):
+        current = [i] + [0]*len(right)
+        for j, b in enumerate(right, 1):
+            cost = a != b
+            current[j] = min(previous[j]+1, current[j-1]+1, previous[j-1]+cost)
+            if previous2 is not None and i > 1 and j > 1 and a == right[j-2] and left[i-2] == b:
+                current[j] = min(current[j], previous2[j-2]+1)
+        if min(current) > limit:
+            return limit+1
+        previous2, previous = previous, current
+    return previous[-1]
+
+
+def typo_allowance(answer):
+    return 0 if len(answer) < FUZZY_MIN_LENGTH else (1 if len(answer) <= 9 else 2)
 GENERIC_MODEL_CODES = frozenset(normalize_alias(word) for word in GENERIC_NAME_PARTS)
 
 
@@ -204,6 +237,18 @@ def identity_forms(value, *, character=False):
     return forms - {""}
 
 
+def possessive_forms(value):
+    """"Kylo Ren's modified TIE whisper" -> "TIE whisper" (added only when unique)."""
+    value = re.split(r"\s+[—–]\s+", value, maxsplit=1)[0]
+    parts = re.split(r"[’']s\s+", value, maxsplit=1)
+    if len(parts) != 2:
+        return set()
+    owned = name_words(parts[1])
+    while owned and owned[0] in POSSESSIVE_ADJECTIVES:
+        owned.pop(0)
+    return {normalize_alias(" ".join(owned))} - {""} if owned else set()
+
+
 def logical_identity_forms(value):
     """Omit class/series connectors and accept complete, unambiguous model codes."""
     value = re.split(r"\s+[—–]\s+", value, maxsplit=1)[0]
@@ -227,7 +272,7 @@ def logical_identity_forms(value):
 
 def capture_names(catalog):
     """Match reviewed identities; ambiguous shortcuts and generic ranks are not accepted."""
-    names, identity_names, parts, part_subjects, logical = {}, {}, {}, {}, {}
+    names, identity_names, parts, part_subjects, logical, possessive = {}, {}, {}, {}, {}, {}
     for key, card in catalog.items():
         if card["category"] == "canon":
             identity_names.setdefault(card.get("subject_id", key), set()).update(
@@ -241,6 +286,7 @@ def capture_names(catalog):
         names[key] = set().union(*(identity_forms(name, character=card["arena"] == "ground")
                                   for name in aliases))
         logical[key] = set().union(*(logical_identity_forms(name) for name in aliases))
+        possessive[key] = set().union(*(possessive_forms(name) for name in aliases))
         parts[key] = set()
         # Edition/phase captions do not become shortcuts such as 'trench' or 'limited'.
         identities = identity_names.get(subject) or [card["name"]]
@@ -272,6 +318,13 @@ def capture_names(catalog):
             logical_subjects.setdefault(answer, set()).add(capture_identity(catalog[key]))
     for key, accepted in names.items():
         accepted.update(answer for answer in logical[key] if len(logical_subjects[answer]) == 1)
+    possessive_subjects = {}
+    for key in catalog:
+        for answer in names[key] | logical[key] | possessive[key]:
+            possessive_subjects.setdefault(answer, set()).add(capture_identity(catalog[key]))
+    for key, accepted in names.items():
+        accepted.update(answer for answer in possessive[key]
+                        if len(possessive_subjects[answer]) == 1 and answer not in GENERIC_CAPTURE_ANSWERS)
     return names
 
 
@@ -339,6 +392,12 @@ CREATE TABLE IF NOT EXISTS capture_history(
  UNIQUE(drop_id,user_id),FOREIGN KEY(drop_id,user_id) REFERENCES claims(drop_id,user_id));
 CREATE INDEX IF NOT EXISTS guild_capture_sequence ON capture_history(guild_id,sequence DESC);
 CREATE TABLE IF NOT EXISTS attempts(drop_id TEXT NOT NULL REFERENCES drops(id),user_id TEXT NOT NULL,next_at REAL NOT NULL,PRIMARY KEY(drop_id,user_id));
+CREATE TABLE IF NOT EXISTS capture_name_failures(
+ sequence INTEGER PRIMARY KEY,drop_id TEXT NOT NULL REFERENCES drops(id),guild_id TEXT NOT NULL,
+ channel_id TEXT NOT NULL,user_id TEXT NOT NULL,card_id TEXT NOT NULL,expected_name TEXT NOT NULL,
+ subject_id TEXT NOT NULL,guess TEXT NOT NULL,normalized_guess TEXT NOT NULL,
+ accepted_names TEXT NOT NULL,matcher_version TEXT NOT NULL,created_at REAL NOT NULL,request_id TEXT UNIQUE);
+CREATE INDEX IF NOT EXISTS capture_name_review ON capture_name_failures(guild_id,card_id,normalized_guess,created_at DESC);
 CREATE TABLE IF NOT EXISTS wishlist(guild_id TEXT NOT NULL,user_id TEXT NOT NULL,card_id TEXT NOT NULL,PRIMARY KEY(guild_id,user_id,card_id));
 CREATE TABLE IF NOT EXISTS ledger(
  id INTEGER PRIMARY KEY,guild_id TEXT NOT NULL,user_id TEXT NOT NULL,delta INTEGER NOT NULL,reason TEXT NOT NULL,reference TEXT NOT NULL,created_at REAL NOT NULL,
@@ -360,7 +419,40 @@ CREATE TABLE IF NOT EXISTS raid_members(
  damage INTEGER NOT NULL DEFAULT 0,attacks INTEGER NOT NULL DEFAULT 0 CHECK(attacks BETWEEN 0 AND 3),last_attack_at REAL,combat TEXT,
  PRIMARY KEY(raid_id,user_id));
 CREATE TABLE IF NOT EXISTS raid_rewards(raid_id TEXT NOT NULL REFERENCES raids(id),user_id TEXT NOT NULL,credits INTEGER NOT NULL,xp INTEGER NOT NULL,PRIMARY KEY(raid_id,user_id));
+CREATE TABLE IF NOT EXISTS transfers(
+ id TEXT PRIMARY KEY,guild_id TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('gift','admin_grant')),
+ actor_id TEXT NOT NULL,from_id TEXT,to_id TEXT NOT NULL,instance_ids TEXT NOT NULL,card_ids TEXT NOT NULL,
+ note TEXT,created_at REAL NOT NULL,request_id TEXT UNIQUE);
+CREATE INDEX IF NOT EXISTS transfer_history ON transfers(guild_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS gambles(
+ id TEXT PRIMARY KEY,guild_id TEXT NOT NULL,user_id TEXT NOT NULL,game TEXT NOT NULL,stake INTEGER NOT NULL CHECK(stake>0),
+ payout INTEGER NOT NULL CHECK(payout>=0),detail TEXT NOT NULL,created_at REAL NOT NULL,request_id TEXT UNIQUE);
+CREATE INDEX IF NOT EXISTS gamble_history ON gambles(guild_id,user_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS wagers(
+ id TEXT PRIMARY KEY,guild_id TEXT NOT NULL,a TEXT NOT NULL,b TEXT NOT NULL,stake INTEGER NOT NULL CHECK(stake>0),
+ status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','settled','cancelled','expired')),
+ winner TEXT,created_at REAL NOT NULL,expires_at REAL NOT NULL,resolved_at REAL,result TEXT,CHECK(a<>b));
+CREATE TABLE IF NOT EXISTS game_settings(guild_id TEXT NOT NULL,key TEXT NOT NULL,value TEXT NOT NULL,PRIMARY KEY(guild_id,key));
+CREATE TABLE IF NOT EXISTS inventory_clears(
+ id TEXT PRIMARY KEY,guild_id TEXT NOT NULL,admin_id TEXT NOT NULL,target_id TEXT NOT NULL,
+ instance_ids TEXT NOT NULL,created_at REAL NOT NULL,restored_at REAL,restored_by TEXT,request_id TEXT UNIQUE);
 """
+# Gambling: in-game credits only (never purchasable, never cashed out, never cards).
+GAMBLE_MIN = 10
+GAMBLE_MAX = 1000
+GAMBLE_DAILY_CAP = 5000
+COINFLIP_WIN_CHANCE = 0.48
+WAGER_HOUSE_PERCENT = 5
+WAGER_DURATION = 120
+SLOT_SYMBOLS = (("Kyber Crystal", 1, 100), ("Death Star", 2, 40), ("Millennium Falcon", 4, 15),
+                ("X-wing", 6, 8), ("TIE Fighter", 8, 5), ("Blaster", 10, 3))
+SLOT_PAIR = 1.2
+SLOT_KYBER_PAIR = 5
+TRADE_MAX_PER_SIDE = 10
+TRADE_MAX_OPEN = 3
+TRADE_DURATION = 3600
+GIFT_MAX = 10
+ADMIN_GRANT_MAX = 10
 
 
 class Game:
@@ -448,17 +540,21 @@ class Game:
                      or data["spawn_weight"] != self.spawn_weights[rarity])):
                 raise ValueError("Rarity spawn weight does not match the published spawn formula")
             if (isinstance(data, dict) and "collector_limit" in data
-                and (rarity not in COLLECTOR_LIMITS or type(data["collector_limit"]) is not int
-                     or data["collector_limit"] != COLLECTOR_LIMITS[rarity])):
+                and (rarity not in COLLECTOR_LIMITS | {STAFF_RARITY: 1} or type(data["collector_limit"]) is not int
+                     or data["collector_limit"] != (COLLECTOR_LIMITS | {STAFF_RARITY: 1})[rarity])):
                 raise ValueError("Rarity collector limit does not match the published collector policy")
         for source in document["cards"]:
             card = dict(source)
             if not card.get("id") or card["id"] in self.catalog:
                 raise ValueError("Card ids must be unique and nonempty")
-            if card.get("rarity") not in RARITIES or card.get("arena") not in ARENAS or card.get("role") not in ROLES:
+            if card.get("rarity") not in ALL_RARITIES or card.get("arena") not in ARENAS or card.get("role") not in ROLES:
                 raise ValueError("Invalid rarity, arena or role for " + card["id"])
-            if card.get("category") not in ("canon", "legends", "meme", "limited"):
+            if card.get("category") not in ("canon", "legends", "meme", "limited", "staff"):
                 raise ValueError("Invalid card category")
+            if (card["rarity"] == STAFF_RARITY) != (card["category"] == "staff"):
+                raise ValueError("Celestial rarity and the staff category must go together: " + card["id"])
+            if card["category"] == "staff" and (card.get("weight", 0) != 0 or card.get("release") or card.get("event_id")):
+                raise ValueError("Staff cards never drop: weight 0 and no release or event: " + card["id"])
             for field in ("attack", "health", "speed"):
                 if not isinstance(card.get(field), int) or card[field] <= 0:
                     raise ValueError("Stats must be positive integers")
@@ -536,7 +632,7 @@ class Game:
         self.rng = random.SystemRandom()
         with contextlib.closing(self._connect()) as connection, connection:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (0, 1, 2, 3, 4, 5, 6, 7):
+            if version not in (0, 1, 2, 3, 4, 5, 6, 7, 8):
                 raise ValueError("Database schema is newer than this engine")
             if ([row[0] for row in connection.execute("PRAGMA integrity_check")] != ["ok"]
                 or connection.execute("PRAGMA foreign_key_check").fetchone() is not None):
@@ -608,7 +704,7 @@ class Game:
                     "Restore those definitions; use weight 0 to retire them from draws without deleting player history."
                 )
             connection.executemany("INSERT OR IGNORE INTO supply(card_id) VALUES(?)", [(key,) for key in self.catalog])
-            connection.execute("PRAGMA user_version=7")
+            connection.execute("PRAGMA user_version=8")
             connection.commit()
 
     def _connect(self):
@@ -703,7 +799,7 @@ class Game:
         return not self._event_exclusive(card) if event_id is None else card.get("event_id")==event_id
 
     def _regular_definition(self,card):
-        return card["category"]!="limited" and not card.get("release") and not self._event_exclusive(card)
+        return card["category"] not in ("limited","staff") and not card.get("release") and not self._event_exclusive(card)
 
     def _eligible(self, connection, card, now, reserve=1, *, override=False):
         release = card.get("release")
@@ -1004,9 +1100,25 @@ class Game:
         self._player(connection, guild_id, user_id)
         return self._instance(connection, instance_id)
 
-    def claim(self, drop_id, user_id, guess, now=None):
-        now, user_id = timestamp(now), str(user_id)
+    def claim(self, drop_id, user_id, guess, now=None, *, request_id=None):
+        now, drop_id, user_id, guess = timestamp(now), str(drop_id), str(user_id), str(guess)
+        if len(guess) > 100:
+            raise GameError("invalid_guess", "Card names may contain at most 100 characters.")
+        if request_id is not None:
+            request_id = str(request_id)
+            if not request_id or len(request_id) > 128:
+                raise ValueError("Capture request IDs must contain 1–128 characters.")
         with self._tx() as connection:
+            if request_id is not None:
+                recorded = connection.execute("SELECT * FROM capture_name_failures WHERE request_id=?", (request_id,)).fetchone()
+                if recorded:
+                    if (recorded["drop_id"], recorded["user_id"], recorded["guess"]) != (drop_id, user_id, guess):
+                        raise GameError("request_conflict", "This request already recorded a different capture attempt.")
+                    # Discord may redeliver a submission after a restart or the
+                    # cooldown has passed. Preserve its original rejection.
+                    raise GameError("wrong_name", "That name was not accepted. This submission was already recorded.",
+                                    details={"retry_after": max(0, math.ceil(recorded["created_at"]+WRONG_COOLDOWN-now)),
+                                             "replayed": True})
             self._expire(connection, now)
             drop = self._drop(connection, drop_id)
             previous = next((claim for claim in drop["claims"] if claim["user_id"] == user_id), None)
@@ -1025,14 +1137,32 @@ class Game:
             recent = connection.execute("""SELECT user_id FROM capture_history
                 WHERE guild_id=? ORDER BY sequence DESC LIMIT 2""", (drop["guild_id"],)).fetchall()
             if len(recent) == 2 and all(row["user_id"] == user_id for row in recent):
-                raise GameError("capture_streak_limit", "You caught the last two cards. Let another collector catch one before you catch again.", persist=True)
+                # Quiet-chat relief: in the last STREAK_RELIEF seconds, if nobody else has
+                # guessed or captured this card, the streak holder may take it instead of
+                # letting it expire.
+                others = connection.execute("""SELECT 1 FROM capture_name_failures WHERE drop_id=? AND user_id<>?
+                    UNION SELECT 1 FROM claims WHERE drop_id=? AND user_id<>? LIMIT 1""",
+                    (drop_id, user_id, drop_id, user_id)).fetchone()
+                if others or now < drop["expires_at"] - STREAK_RELIEF:
+                    wait = max(1, math.ceil(drop["expires_at"] - STREAK_RELIEF - now))
+                    message = ("You caught the last two cards. Let another collector catch one before you catch again."
+                               if others else
+                               f"You caught the last two cards. If nobody else tries in the next {wait} seconds, you can take this one.")
+                    raise GameError("capture_streak_limit", message, details={"retry_after": wait} if not others else {}, persist=True)
             attempt = connection.execute("SELECT next_at FROM attempts WHERE drop_id=? AND user_id=?", (str(drop_id), user_id)).fetchone()
             if attempt and now < attempt["next_at"]:
                 wait = max(1, math.ceil(attempt["next_at"]-now))
                 raise GameError("guess_cooldown", f"Wait {wait} seconds before another guess.", details={"retry_after": wait}, persist=True)
             accepted = self.capture_names[drop["card_id"]]
-            if not normalize_alias(guess) or not {normalize_alias(guess), untitled_name(guess)} & accepted:
+            if not normalize_alias(guess) or not ({normalize_alias(guess), untitled_name(guess)} & accepted
+                                                  or self.close_spelling(drop["card_id"], guess)):
                 connection.execute("INSERT INTO attempts(drop_id,user_id,next_at) VALUES(?,?,?) ON CONFLICT(drop_id,user_id) DO UPDATE SET next_at=excluded.next_at", (str(drop_id), user_id, now+WRONG_COOLDOWN))
+                connection.execute("""INSERT INTO capture_name_failures(
+                    drop_id,guild_id,channel_id,user_id,card_id,expected_name,subject_id,guess,normalized_guess,
+                    accepted_names,matcher_version,created_at,request_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (drop_id, drop["guild_id"], drop["channel_id"], user_id, drop["card_id"], drop["card"]["name"],
+                     drop["card"].get("subject_id", drop["card_id"]), guess, normalize_alias(guess),
+                     json.dumps(sorted(accepted), ensure_ascii=False), CAPTURE_NAME_MATCHER_VERSION, now, request_id))
                 raise GameError("wrong_name", "That name is not accepted. Use its name, nickname, or a matching name part; titles are optional. Try again in 3 seconds.", details={"retry_after": 3}, persist=True)
             instance = self._mint(connection, drop["guild_id"], user_id, drop["card_id"], now, "drop:"+str(drop_id))
             connection.execute("INSERT INTO claims(drop_id,user_id,instance_id,claimed_at) VALUES(?,?,?,?)", (str(drop_id), user_id, instance["id"], now))
@@ -1043,8 +1173,42 @@ class Game:
             self._credit(connection, drop["guild_id"], user_id, 25, "capture", str(drop_id), now, xp=10)
             return {"instance": instance, "remaining": remaining, "drop": self._drop(connection, drop_id), "credits_earned": 25, "replayed": False}
 
+    def failed_guesses(self, guild_id, page=1, card_id=""):
+        """Private review aggregates; names are evidence, never automatic aliases."""
+        page = max(1, int(page))
+        card_id = str(card_id)
+        if card_id:
+            self._card(card_id)
+        where, parameters = "guild_id=?", [str(guild_id)]
+        if card_id:
+            where += " AND card_id=?"
+            parameters.append(card_id)
+        with contextlib.closing(self._connect()) as connection:
+            rows = connection.execute(f"""WITH groups AS (
+                SELECT card_id,normalized_guess,COUNT(*) AS attempts,COUNT(DISTINCT user_id) AS players,
+                    MIN(created_at) AS first_at,MAX(created_at) AS last_at,MAX(sequence) AS latest_sequence
+                FROM capture_name_failures WHERE {where} GROUP BY card_id,normalized_guess
+                ORDER BY last_at DESC,latest_sequence DESC LIMIT 5 OFFSET ?)
+                SELECT groups.*,f.guess,f.expected_name,f.accepted_names,f.matcher_version,f.drop_id
+                FROM groups JOIN capture_name_failures f ON f.sequence=groups.latest_sequence
+                ORDER BY groups.last_at DESC,groups.latest_sequence DESC""", (*parameters, (page-1)*5)).fetchall()
+        result = []
+        for row in rows:
+            accepted = self.capture_names[row["card_id"]]
+            result.append({"card_id": row["card_id"], "card_name": self.catalog[row["card_id"]]["name"],
+                           "normalized_guess": row["normalized_guess"], "latest_guess": row["guess"],
+                           "attempts": row["attempts"], "players": row["players"],
+                           "first_at": row["first_at"], "last_at": row["last_at"],
+                           "accepted_now": bool(row["normalized_guess"] and
+                                                {row["normalized_guess"], untitled_name(row["guess"])} & accepted),
+                           "accepted_names": sorted(accepted),
+                           "accepted_names_then": json.loads(row["accepted_names"]),
+                           "expected_name_then": row["expected_name"], "matcher_version_then": row["matcher_version"],
+                           "latest_drop_id": row["drop_id"]})
+        return result
+
     def inventory(self, guild_id, user_id, search="", rarity="", limit=20, offset=0, *, arena=None, card_id=None):
-        if rarity and rarity not in RARITIES:
+        if rarity and rarity not in ALL_RARITIES:
             raise GameError("invalid_rarity", "Choose a catalogue rarity.")
         limit, offset = max(1,min(100,int(limit))), max(0,int(offset))
         with self._tx() as connection:
@@ -1058,6 +1222,43 @@ class Game:
     def matches_card(self, card_id, search):
         query = normalize_alias(search)
         return not query or query in normalize_alias(card_id) or any(query in name for name in self.capture_names[card_id])
+
+    def close_spelling(self, card_id, guess):
+        """Accept a small typo of one accepted name when no other card is as close.
+
+        Only answers of six or more letters qualify (one typo up to nine letters,
+        two beyond). The guess must be strictly closer to this card's identity
+        than to every other card identity, so typos never cross cards.
+        """
+        identity = capture_identity(self.catalog[card_id])
+        best = None
+        for candidate in {normalize_alias(guess), untitled_name(guess)} - {""}:
+            if candidate in GENERIC_CAPTURE_ANSWERS or candidate in GENERIC_MODEL_CODES:
+                continue
+            for answer in self.capture_names[card_id]:
+                allowance = typo_allowance(answer)
+                if not allowance or len(candidate) < FUZZY_MIN_LENGTH:
+                    continue
+                # Model numbers are identity, not spelling: B1 ≠ B2, never dropped.
+                if sorted(ch for ch in answer if ch.isdigit()) != sorted(ch for ch in candidate if ch.isdigit()):
+                    continue
+                distance = edit_distance(candidate, answer, allowance)
+                if distance <= allowance and (best is None or distance < best[0]):
+                    best = (distance, candidate)
+        if best is None:
+            return False
+        distance, candidate = best
+        if not hasattr(self, "_fuzzy_index"):
+            index = {}
+            for key, names in self.capture_names.items():
+                for answer in names:
+                    index.setdefault(len(answer), []).append((answer, capture_identity(self.catalog[key])))
+            self._fuzzy_index = index
+        for length in range(len(candidate)-distance, len(candidate)+distance+1):
+            for answer, other in self._fuzzy_index.get(length, ()):
+                if other != identity and edit_distance(candidate, answer, distance) <= distance:
+                    return False
+        return True
 
     def owned_cards(self, guild_id, user_id, search="", limit=25):
         with self._tx() as connection:
@@ -1200,7 +1401,8 @@ class Game:
             rows = connection.execute("SELECT card_id FROM instances WHERE guild_id=? AND user_id=? AND consumed_at IS NULL", (str(guild_id),str(user_id))).fetchall()
             unique = {row["card_id"] for row in rows}
             regular = {card_id for card_id,card in self.catalog.items() if self._regular_definition(card)}
-            event = set(self.catalog)-regular
+            staff = {card_id for card_id,card in self.catalog.items() if card["category"] == "staff"}
+            event = set(self.catalog)-regular-staff
             completed = len(unique & regular)
             subjects = {self.catalog[key]["subject_id"] for key in regular if isinstance(self.catalog[key].get("subject_id"),str) and self.catalog[key]["subject_id"]}
             collected_subjects = {self.catalog[key]["subject_id"] for key in unique & regular if isinstance(self.catalog[key].get("subject_id"),str) and self.catalog[key]["subject_id"]}
@@ -1210,6 +1412,7 @@ class Game:
                           regular_subject_completion_percent=round(100*len(collected_subjects)/len(subjects),1) if subjects else 0,
                           regular_subject_metadata_complete=all(isinstance(self.catalog[key].get("subject_id"),str) and bool(self.catalog[key]["subject_id"]) for key in regular),
                           event_unique_cards=len(unique & event),event_catalog_count=len(event),level=1+player["xp"]//100,
+                          celestial_cards=len(unique & staff),
                           arena_counts=dict(Counter(self._card(row["card_id"])["arena"] for row in rows)))
             return player
 
@@ -1260,6 +1463,8 @@ class Game:
             deck_ids.update(item["id"] for item in json.loads(row["deck"])["cards"])
         items = [self._instance(connection,key,guild_id,user_id) for key in ids]
         for item in items:
+            if item["card"]["category"] == "staff":
+                raise GameError("bound_card", "Celestial cards can't be recycled or used as crafting ingredients.")
             if item["favorite"] or item["locked_by"] or item["id"] in deck_ids:
                 raise GameError("protected_card", "Favorites, deck cards, active raid loadouts and trade escrow cannot be consumed or offered.")
         return items
@@ -1384,7 +1589,359 @@ class Game:
         connection.execute("UPDATE trades SET status=? WHERE id=?",(status,str(trade_id)))
         connection.execute("DELETE FROM trade_items WHERE trade_id=?",(str(trade_id),))
 
-    def trade_create(self,guild_id,user_id,target_id,now=None,duration=900):
+    def _transferable(self, connection, guild_id, user_id, instance_ids, limit):
+        """Cards a player may deliberately hand over after an explicit review.
+
+        Unlike crafting/salvage, favorites and saved deck cards may move: the
+        sender confirms the exact copies, and the copy leaves their deck. Copies
+        in another trade's escrow or an active raid squad stay locked.
+        """
+        ids = [str(key) for key in instance_ids]
+        if not 1 <= len(ids) <= limit or len(ids) != len(set(ids)):
+            raise GameError("invalid_selection", f"Select 1–{limit} distinct copies you own.")
+        raid_ids = set()
+        for row in connection.execute("SELECT m.deck FROM raid_members m JOIN raids r ON r.id=m.raid_id WHERE r.guild_id=? AND m.user_id=? AND r.status IN ('signup','active')",(str(guild_id),str(user_id))):
+            raid_ids.update(item["id"] for item in json.loads(row["deck"])["cards"])
+        items = [self._instance(connection,key,guild_id,user_id) for key in ids]
+        for item in items:
+            if item["card"]["category"] == "staff":
+                raise GameError("bound_card", f"{item['name']} is a Celestial card. It stays with the person staff gave it to.")
+            if item["locked_by"]:
+                raise GameError("escrow_locked", f"{item['name']} is already on another trade table. Cancel that trade first.")
+            if item["id"] in raid_ids:
+                raise GameError("protected_card", f"{item['name']} is fighting in an active raid. Try again after the raid ends.")
+        return items
+
+    def _move_instance(self, connection, item, new_owner):
+        """Transfer one copy; remove it from the old owner's saved decks."""
+        old_owner = item["user_id"]
+        for row in connection.execute("SELECT arena,instance_ids FROM decks WHERE guild_id=? AND user_id=?",(item["guild_id"],old_owner)).fetchall():
+            ids = json.loads(row["instance_ids"])
+            if item["id"] in ids:
+                ids.remove(item["id"])
+                connection.execute("UPDATE decks SET instance_ids=? WHERE guild_id=? AND user_id=? AND arena=?",
+                                   (json.dumps(ids),item["guild_id"],old_owner,row["arena"]))
+        connection.execute("UPDATE instances SET user_id=?,locked_by=NULL,favorite=0 WHERE id=?",(str(new_owner),item["id"]))
+        self._player(connection,item["guild_id"],new_owner)
+
+    def give(self, guild_id, user_id, target_id, instance_ids, now=None, *, request_id=None, note=None):
+        """One-way gift of owned copies. No credits, no confirmation from the receiver."""
+        now, guild_id, user_id, target_id = timestamp(now), str(guild_id), str(user_id), str(target_id)
+        if user_id == target_id:
+            raise GameError("self_gift", "Choose someone other than yourself.")
+        with self._tx() as connection:
+            self._expire(connection, now)
+            if request_id is not None:
+                prior = connection.execute("SELECT * FROM transfers WHERE request_id=?", (str(request_id),)).fetchone()
+                if prior:
+                    return {**self._transfer_record(prior), "replayed": True}
+            items = self._transferable(connection, guild_id, user_id, instance_ids, GIFT_MAX)
+            for item in items:
+                self._move_instance(connection, item, target_id)
+            record = self._record_transfer(connection, guild_id, "gift", user_id, user_id, target_id, items, now, request_id, note)
+            return {**record, "replayed": False}
+
+    def starter_pool(self):
+        """Well-known regular Commons from one arena, so a new deck works on day one."""
+        return [card for card in self.catalog.values()
+                if card["rarity"] == "common" and card["category"] == "canon" and card["arena"] == "ground"
+                and not card.get("release") and not self._event_exclusive(card) and card["weight"] > 0
+                and card.get("notability", 0) >= 4]
+
+    def starter_pack(self, guild_id, user_id, now=None):
+        """Once per member holding fewer than three cards: three notable Commons and credits.
+
+        Idempotent through the credit ledger; returns None when not eligible.
+        """
+        now, guild_id, user_id = timestamp(now), str(guild_id), str(user_id)
+        pool = self.starter_pool()
+        if len(pool) < STARTER_CARDS:
+            return None
+        with self._tx() as connection:
+            if connection.execute("SELECT 1 FROM ledger WHERE guild_id=? AND user_id=? AND reason='starter'",
+                                  (guild_id, user_id)).fetchone():
+                return None
+            owned = connection.execute("SELECT COUNT(*) FROM instances WHERE guild_id=? AND user_id=? AND consumed_at IS NULL",
+                                       (guild_id, user_id)).fetchone()[0]
+            if owned >= STARTER_CARDS:
+                return None
+            subjects, chosen = set(), []
+            for card in self.rng.sample(pool, len(pool)):
+                if card.get("subject_id", card["id"]) not in subjects:
+                    subjects.add(card.get("subject_id", card["id"]))
+                    chosen.append(card)
+                if len(chosen) == STARTER_CARDS:
+                    break
+            items = [self._mint(connection, guild_id, user_id, card["id"], now, "starter") for card in chosen]
+            self._credit(connection, guild_id, user_id, STARTER_CREDITS, "starter", "starter", now)
+            return {"instances": items, "credits": STARTER_CREDITS}
+
+    def admin_grant(self, guild_id, admin_id, target_id, card_id, count=1, now=None, *, request_id=None, note=None):
+        """Mint fresh copies straight into a member's collection (server managers only)."""
+        now, guild_id, admin_id, target_id = timestamp(now), str(guild_id), str(admin_id), str(target_id)
+        card = self._card(card_id)
+        if type(count) is not int or not 1 <= count <= ADMIN_GRANT_MAX:
+            raise GameError("invalid_count", f"Grant 1–{ADMIN_GRANT_MAX} copies at a time.")
+        with self._tx() as connection:
+            if request_id is not None:
+                prior = connection.execute("SELECT * FROM transfers WHERE request_id=?", (str(request_id),)).fetchone()
+                if prior:
+                    return {**self._transfer_record(prior), "replayed": True}
+            release = card.get("release")
+            if release:
+                supply = connection.execute("SELECT minted,reserved FROM supply WHERE card_id=?", (card["id"],)).fetchone()
+                left = release["supply_cap"] - supply["minted"] - supply["reserved"]
+                if count > left:
+                    raise GameError("unavailable_card", f"{card['name']} is a numbered edition with {max(0,left)} copies left.")
+            items = [self._mint(connection, guild_id, target_id, card["id"], now, "admin:" + admin_id) for _ in range(count)]
+            record = self._record_transfer(connection, guild_id, "admin_grant", admin_id, None, target_id, items, now, request_id, note)
+            return {**record, "replayed": False}
+
+    def admin_clear_inventory(self, guild_id, admin_id, target_id, now=None, *, request_id=None):
+        """Remove every active copy a member owns (server managers only); reversible.
+
+        Open trades involving the member are cancelled first so escrow returns
+        cleanly, and their saved decks are emptied. Credits and stats are untouched.
+        """
+        now, guild_id, admin_id, target_id = timestamp(now), str(guild_id), str(admin_id), str(target_id)
+        with self._tx() as connection:
+            self._expire(connection, now)
+            if request_id is not None:
+                prior = connection.execute("SELECT * FROM inventory_clears WHERE request_id=?", (str(request_id),)).fetchone()
+                if prior:
+                    return {**dict(prior), "instance_ids": json.loads(prior["instance_ids"]), "replayed": True}
+            if connection.execute("""SELECT 1 FROM raid_members m JOIN raids r ON r.id=m.raid_id
+                    WHERE r.guild_id=? AND m.user_id=? AND r.status IN ('signup','active')""", (guild_id, target_id)).fetchone():
+                raise GameError("raid_active", "That member is in an active raid. Try again after it ends.")
+            for row in connection.execute("SELECT id FROM trades WHERE guild_id=? AND status='open' AND (a=? OR b=?)",
+                                          (guild_id, target_id, target_id)).fetchall():
+                self._close_trade(connection, row["id"], "cancelled")
+            ids = [row["id"] for row in connection.execute(
+                "SELECT id FROM instances WHERE guild_id=? AND user_id=? AND consumed_at IS NULL", (guild_id, target_id))]
+            connection.execute("UPDATE instances SET consumed_at=?,favorite=0 WHERE guild_id=? AND user_id=? AND consumed_at IS NULL",
+                               (now, guild_id, target_id))
+            connection.execute("UPDATE decks SET instance_ids='[]' WHERE guild_id=? AND user_id=?", (guild_id, target_id))
+            clear_id = secrets.token_hex(8)
+            connection.execute("INSERT INTO inventory_clears(id,guild_id,admin_id,target_id,instance_ids,created_at,request_id) VALUES(?,?,?,?,?,?,?)",
+                               (clear_id, guild_id, admin_id, target_id, json.dumps(ids), now,
+                                None if request_id is None else str(request_id)))
+            return {"id": clear_id, "guild_id": guild_id, "target_id": target_id, "instance_ids": ids,
+                    "created_at": now, "replayed": False}
+
+    def admin_restore_inventory(self, guild_id, admin_id, clear_id, now=None):
+        """Undo a clear: copies removed by it (and not otherwise changed) come back."""
+        now, guild_id = timestamp(now), str(guild_id)
+        with self._tx() as connection:
+            row = connection.execute("SELECT * FROM inventory_clears WHERE id=? AND guild_id=?", (str(clear_id), guild_id)).fetchone()
+            if not row:
+                raise GameError("unknown_clear", "No inventory clear with that reference exists in this server.")
+            if row["restored_at"]:
+                raise GameError("already_restored", "That clear was already undone.")
+            restored = 0
+            for key in json.loads(row["instance_ids"]):
+                restored += connection.execute("""UPDATE instances SET consumed_at=NULL
+                    WHERE id=? AND user_id=? AND consumed_at=?""", (key, row["target_id"], row["created_at"])).rowcount
+            connection.execute("UPDATE inventory_clears SET restored_at=?,restored_by=? WHERE id=?", (now, str(admin_id), row["id"]))
+            return {"id": row["id"], "target_id": row["target_id"], "restored": restored}
+
+    def inventory_clears(self, guild_id, limit=10):
+        with contextlib.closing(self._connect()) as connection:
+            return [dict(row) | {"instance_ids": json.loads(row["instance_ids"])} for row in connection.execute(
+                "SELECT * FROM inventory_clears WHERE guild_id=? ORDER BY created_at DESC LIMIT ?", (str(guild_id), int(limit)))]
+
+    # ---------- gambling (credits only) ----------
+
+    def gambling_enabled(self, guild_id):
+        with contextlib.closing(self._connect()) as connection:
+            row = connection.execute("SELECT value FROM game_settings WHERE guild_id=? AND key='gambling'", (str(guild_id),)).fetchone()
+            return row is None or row["value"] != "off"
+
+    def set_gambling(self, guild_id, enabled):
+        with self._tx() as connection:
+            connection.execute("INSERT INTO game_settings(guild_id,key,value) VALUES(?,'gambling',?) "
+                               "ON CONFLICT(guild_id,key) DO UPDATE SET value=excluded.value",
+                               (str(guild_id), "on" if enabled else "off"))
+        return enabled
+
+    @staticmethod
+    def _utc_day_start(now):
+        return dt.datetime.combine(dt.datetime.fromtimestamp(now, dt.UTC).date(), dt.time(), dt.UTC).timestamp()
+
+    def _wagered_today(self, connection, guild_id, user_id, now):
+        start = self._utc_day_start(now)
+        solo = connection.execute("SELECT COALESCE(SUM(stake),0) FROM gambles WHERE guild_id=? AND user_id=? AND created_at>=?",
+                                  (guild_id, user_id, start)).fetchone()[0]
+        duels = connection.execute("""SELECT COALESCE(SUM(stake),0) FROM wagers WHERE guild_id=? AND status='settled'
+            AND (a=? OR b=?) AND resolved_at>=?""", (guild_id, user_id, user_id, start)).fetchone()[0]
+        return solo + duels
+
+    def _gamble_guard(self, connection, guild_id, user_id, stake, now):
+        if type(stake) is not int or not GAMBLE_MIN <= stake <= GAMBLE_MAX:
+            raise GameError("invalid_stake", f"Bets are {GAMBLE_MIN}–{GAMBLE_MAX:,} credits.")
+        row = connection.execute("SELECT value FROM game_settings WHERE guild_id=? AND key='gambling'", (guild_id,)).fetchone()
+        if row and row["value"] == "off":
+            raise GameError("gambling_paused", "Server staff have paused gambling.")
+        if self._player(connection, guild_id, user_id)["credits"] < stake:
+            raise GameError("insufficient_credits", "You don't have enough credits for that bet.")
+        used = self._wagered_today(connection, guild_id, user_id, now)
+        if used + stake > GAMBLE_DAILY_CAP:
+            left = max(0, GAMBLE_DAILY_CAP - used)
+            raise GameError("gamble_cap", f"Daily betting limit reached: {left:,} of {GAMBLE_DAILY_CAP:,} credits left today (resets 00:00 UTC).")
+
+    def _settle_gamble(self, connection, guild_id, user_id, game, stake, payout, detail, now, request_id):
+        gamble_id = secrets.token_hex(8)
+        self._credit(connection, guild_id, user_id, -stake, "gamble", gamble_id, now)
+        if payout:
+            self._credit(connection, guild_id, user_id, payout, "gamble_win", gamble_id, now)
+        connection.execute("INSERT INTO gambles(id,guild_id,user_id,game,stake,payout,detail,created_at,request_id) VALUES(?,?,?,?,?,?,?,?,?)",
+                           (gamble_id, guild_id, user_id, game, stake, payout, json.dumps(detail), now,
+                            None if request_id is None else str(request_id)))
+        return {"id": gamble_id, "game": game, "stake": stake, "payout": payout, "net": payout - stake, **detail,
+                "credits": self._player(connection, guild_id, user_id)["credits"],
+                "wagered_today": self._wagered_today(connection, guild_id, user_id, now), "daily_cap": GAMBLE_DAILY_CAP,
+                "replayed": False}
+
+    def _gamble_replay(self, connection, request_id, guild_id, user_id, now):
+        if request_id is None:
+            return None
+        row = connection.execute("SELECT * FROM gambles WHERE request_id=?", (str(request_id),)).fetchone()
+        if not row:
+            return None
+        return {"id": row["id"], "game": row["game"], "stake": row["stake"], "payout": row["payout"],
+                "net": row["payout"] - row["stake"], **json.loads(row["detail"]),
+                "credits": self._player(connection, guild_id, user_id)["credits"],
+                "wagered_today": self._wagered_today(connection, guild_id, user_id, now), "daily_cap": GAMBLE_DAILY_CAP,
+                "replayed": True}
+
+    def coinflip(self, guild_id, user_id, stake, call, now=None, *, request_id=None):
+        now, guild_id, user_id = timestamp(now), str(guild_id), str(user_id)
+        call = str(call).lower()
+        if call not in ("heads", "tails"):
+            raise GameError("invalid_call", "Call heads or tails.")
+        with self._tx() as connection:
+            replay = self._gamble_replay(connection, request_id, guild_id, user_id, now)
+            if replay:
+                return replay
+            self._gamble_guard(connection, guild_id, user_id, stake, now)
+            won = self.rng.random() < COINFLIP_WIN_CHANCE
+            landed = call if won else ("tails" if call == "heads" else "heads")
+            return self._settle_gamble(connection, guild_id, user_id, "coinflip", stake, stake * 2 if won else 0,
+                                       {"call": call, "landed": landed, "won": won}, now, request_id)
+
+    def slots(self, guild_id, user_id, stake, now=None, *, request_id=None):
+        now, guild_id, user_id = timestamp(now), str(guild_id), str(user_id)
+        with self._tx() as connection:
+            replay = self._gamble_replay(connection, request_id, guild_id, user_id, now)
+            if replay:
+                return replay
+            self._gamble_guard(connection, guild_id, user_id, stake, now)
+            reels = self.rng.choices([name for name, _, _ in SLOT_SYMBOLS], weights=[w for _, w, _ in SLOT_SYMBOLS], k=3)
+            counts = Counter(reels)
+            symbol, count = counts.most_common(1)[0]
+            multiplier = 0
+            if count == 3:
+                multiplier = next(pay for name, _, pay in SLOT_SYMBOLS if name == symbol)
+            elif count == 2:
+                multiplier = SLOT_KYBER_PAIR if symbol == "Kyber Crystal" else SLOT_PAIR
+            payout = math.floor(stake * multiplier)
+            return self._settle_gamble(connection, guild_id, user_id, "slots", stake, payout,
+                                       {"reels": reels, "multiplier": multiplier, "jackpot": count == 3 and multiplier >= 40},
+                                       now, request_id)
+
+    def _expire_wagers(self, connection, now):
+        connection.execute("UPDATE wagers SET status='expired',resolved_at=? WHERE status='pending' AND expires_at<=?", (now, now))
+
+    def wager_create(self, guild_id, user_id, target_id, stake, now=None):
+        now, guild_id, user_id, target_id = timestamp(now), str(guild_id), str(user_id), str(target_id)
+        if user_id == target_id:
+            raise GameError("self_wager", "Challenge someone else.")
+        with self._tx() as connection:
+            self._expire_wagers(connection, now)
+            self._gamble_guard(connection, guild_id, user_id, stake, now)
+            if connection.execute("SELECT 1 FROM wagers WHERE guild_id=? AND status='pending' AND (a=? OR b=?)",
+                                  (guild_id, user_id, user_id)).fetchone():
+                raise GameError("active_wager", "You already have a pending wager. Wait for it to finish or cancel it.")
+            wager_id = secrets.token_hex(8)
+            connection.execute("INSERT INTO wagers(id,guild_id,a,b,stake,created_at,expires_at) VALUES(?,?,?,?,?,?,?)",
+                               (wager_id, guild_id, user_id, target_id, stake, now, now + WAGER_DURATION))
+            return dict(connection.execute("SELECT * FROM wagers WHERE id=?", (wager_id,)).fetchone())
+
+    def get_wager(self, wager_id, now=None):
+        with self._tx() as connection:
+            self._expire_wagers(connection, timestamp(now))
+            row = connection.execute("SELECT * FROM wagers WHERE id=?", (str(wager_id),)).fetchone()
+            if not row:
+                raise GameError("unknown_wager", "That wager no longer exists.")
+            result = dict(row)
+            result["result"] = json.loads(row["result"]) if row["result"] else None
+            return result
+
+    def wager_respond(self, wager_id, user_id, accept, now=None):
+        """The challenged player accepts (both stakes settle at once) or either side cancels."""
+        now, user_id = timestamp(now), str(user_id)
+        with self._tx() as connection:
+            self._expire_wagers(connection, now)
+            row = connection.execute("SELECT * FROM wagers WHERE id=?", (str(wager_id),)).fetchone()
+            if not row:
+                raise GameError("unknown_wager", "That wager no longer exists.")
+            if row["status"] != "pending":
+                raise GameError("wager_closed", f"This wager is already {row['status']}.")
+            if user_id not in (row["a"], row["b"]):
+                raise GameError("not_participant", "Only the two players in this wager can respond.")
+            if not accept:
+                connection.execute("UPDATE wagers SET status='cancelled',resolved_at=? WHERE id=?", (now, row["id"]))
+            else:
+                if user_id != row["b"]:
+                    raise GameError("not_participant", "Only the challenged player can accept.")
+                for person in (row["a"], row["b"]):
+                    try:
+                        self._gamble_guard(connection, row["guild_id"], person, row["stake"], now)
+                    except GameError as error:
+                        who = "You" if person == user_id else "The challenger"
+                        raise GameError(error.code, f"{who}: {error.message}") from None
+                winner = self.rng.choice((row["a"], row["b"]))
+                pot = row["stake"] * 2
+                prize = pot - pot * WAGER_HOUSE_PERCENT // 100
+                for person in (row["a"], row["b"]):
+                    self._credit(connection, row["guild_id"], person, -row["stake"], "wager", row["id"], now)
+                self._credit(connection, row["guild_id"], winner, prize, "wager_win", row["id"], now)
+                connection.execute("UPDATE wagers SET status='settled',winner=?,resolved_at=?,result=? WHERE id=?",
+                                   (winner, now, json.dumps({"pot": pot, "prize": prize, "house": pot - prize}), row["id"]))
+        return self.get_wager(wager_id, now)
+
+    def gamble_stats(self, guild_id, user_id, now=None):
+        now, guild_id, user_id = timestamp(now), str(guild_id), str(user_id)
+        with self._tx() as connection:
+            solo = connection.execute("SELECT COUNT(*),COALESCE(SUM(stake),0),COALESCE(SUM(payout),0),COALESCE(MAX(payout),0) "
+                                      "FROM gambles WHERE guild_id=? AND user_id=?", (guild_id, user_id)).fetchone()
+            duels = connection.execute("""SELECT COUNT(*),COALESCE(SUM(CASE WHEN winner=? THEN 1 ELSE 0 END),0) FROM wagers
+                WHERE guild_id=? AND status='settled' AND (a=? OR b=?)""", (user_id, guild_id, user_id, user_id)).fetchone()
+            return {"bets": solo[0], "wagered": solo[1], "won": solo[2], "net": solo[2] - solo[1], "biggest_payout": solo[3],
+                    "wagers": duels[0], "wager_wins": duels[1], "wagered_today": self._wagered_today(connection, guild_id, user_id, now),
+                    "daily_cap": GAMBLE_DAILY_CAP, "credits": self._player(connection, guild_id, user_id)["credits"]}
+
+    def _record_transfer(self, connection, guild_id, kind, actor_id, from_id, to_id, items, now, request_id, note):
+        transfer_id = secrets.token_hex(8)
+        note = (str(note).strip()[:200] or None) if note else None
+        connection.execute("""INSERT INTO transfers(id,guild_id,kind,actor_id,from_id,to_id,instance_ids,card_ids,note,created_at,request_id)
+            VALUES(?,?,?,?,?,?,?,?,?,?,?)""", (transfer_id, str(guild_id), kind, str(actor_id), from_id, str(to_id),
+            json.dumps([item["id"] for item in items]), json.dumps([item["card_id"] for item in items]), note, now,
+            None if request_id is None else str(request_id)))
+        return self._transfer_record(connection.execute("SELECT * FROM transfers WHERE id=?", (transfer_id,)).fetchone())
+
+    def _transfer_record(self, row):
+        record = dict(row)
+        record["instance_ids"] = json.loads(row["instance_ids"])
+        record["cards"] = [self._card(key) for key in json.loads(row["card_ids"])]
+        return record
+
+    def transfers(self, guild_id, limit=20):
+        with contextlib.closing(self._connect()) as connection:
+            rows = connection.execute("SELECT * FROM transfers WHERE guild_id=? ORDER BY created_at DESC LIMIT ?",
+                                      (str(guild_id), max(1, min(100, int(limit))))).fetchall()
+            return [self._transfer_record(row) for row in rows]
+
+    def trade_create(self,guild_id,user_id,target_id,now=None,duration=TRADE_DURATION):
         now,user_id,target_id = timestamp(now),str(user_id),str(target_id)
         if user_id == target_id:
             raise GameError("self_trade","Choose a different collector.")
@@ -1392,8 +1949,17 @@ class Game:
             raise GameError("invalid_duration","A trade must expire within one hour.")
         with self._tx() as connection:
             self._expire(connection,now)
-            if connection.execute("SELECT 1 FROM trades WHERE guild_id=? AND status='open' AND (a IN (?,?) OR b IN (?,?))",(str(guild_id),user_id,target_id,user_id,target_id)).fetchone():
-                raise GameError("active_trade","One of you already has an open trade. Finish or cancel it first.")
+            # Reopen an existing table between the same two people instead of failing.
+            existing = connection.execute("SELECT id FROM trades WHERE guild_id=? AND status='open' AND ((a=? AND b=?) OR (a=? AND b=?))",
+                                          (str(guild_id),user_id,target_id,target_id,user_id)).fetchone()
+            if existing:
+                return {**self._trade(connection,existing["id"]), "reopened": True}
+            for person in (user_id, target_id):
+                count = connection.execute("SELECT COUNT(*) FROM trades WHERE guild_id=? AND status='open' AND (a=? OR b=?)",
+                                           (str(guild_id),person,person)).fetchone()[0]
+                if count >= TRADE_MAX_OPEN:
+                    who = "You already have" if person == user_id else "That collector already has"
+                    raise GameError("active_trade",f"{who} {TRADE_MAX_OPEN} open trades. Finish or cancel one first (`/vault trade` lists them).")
             trade_id = secrets.token_hex(8)
             connection.execute("INSERT INTO trades(id,guild_id,a,b,created_at,expires_at) VALUES(?,?,?,?,?,?)",(trade_id,str(guild_id),user_id,target_id,now,now+duration))
             return self._trade(connection,trade_id,new_revision=True)
@@ -1408,9 +1974,9 @@ class Game:
             # the previous offer because this entire transaction rolls back.
             connection.execute("UPDATE instances SET locked_by=NULL WHERE id IN (SELECT instance_id FROM trade_items WHERE trade_id=? AND owner_id=?)",(str(trade_id),user_id))
             connection.execute("DELETE FROM trade_items WHERE trade_id=? AND owner_id=?",(str(trade_id),user_id))
-            items = self._unprotected(connection,trade["guild_id"],user_id,instance_ids) if instance_ids else []
-            if len(items) > 5:
-                raise GameError("invalid_selection","Offer at most five cards per side.")
+            if instance_ids and len(instance_ids) > TRADE_MAX_PER_SIDE:
+                raise GameError("invalid_selection",f"Offer at most {TRADE_MAX_PER_SIDE} cards per side.")
+            items = self._transferable(connection,trade["guild_id"],user_id,instance_ids,TRADE_MAX_PER_SIDE) if instance_ids else []
             for item in items:
                 connection.execute("UPDATE instances SET locked_by=? WHERE id=?",(str(trade_id),item["id"]))
                 connection.execute("INSERT INTO trade_items(trade_id,instance_id,owner_id) VALUES(?,?,?)",(str(trade_id),item["id"],user_id))
@@ -1425,8 +1991,8 @@ class Game:
             user_id = self._trade_actor(trade,user_id)
             if int(version) != trade["version"]:
                 raise GameError("stale_trade","The offer or its card details changed. Review both sides and accept the new version.",persist=True)
-            if not trade["offers"][trade["a"]] or not trade["offers"][trade["b"]]:
-                raise GameError("empty_trade","Both sides must offer at least one card before accepting.")
+            if not trade["offers"][trade["a"]] and not trade["offers"][trade["b"]]:
+                raise GameError("empty_trade","Add at least one card before confirming. One-sided offers are fine.")
             field = "accepted_a" if user_id == trade["a"] else "accepted_b"
             connection.execute("UPDATE trades SET "+field+"=1 WHERE id=?",(str(trade_id),))
             refreshed = self._trade(connection,trade_id)
@@ -1437,7 +2003,7 @@ class Game:
                     for item in refreshed["offers"][owner]:
                         if item["user_id"] != owner or item["locked_by"] != str(trade_id):
                             raise GameError("invalid_escrow","Escrow ownership changed; cancel and review the trade.")
-                        connection.execute("UPDATE instances SET user_id=?,locked_by=NULL WHERE id=?",(target,item["id"]))
+                        self._move_instance(connection,item,target)
                 self._close_trade(connection,trade_id,"completed")
             return self._trade(connection,trade_id)
 

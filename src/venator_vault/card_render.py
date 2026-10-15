@@ -9,6 +9,7 @@ import hashlib
 import io
 import json
 import math
+import os
 import random
 import threading
 from collections import OrderedDict
@@ -19,7 +20,9 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 from .presentation import art_path
 
 SIZE = (1000, 1400)
-VERSION = "hyperspace-foil-2.3"
+LEGACY_VERSION = "hyperspace-foil-2.3"
+CARD_STYLE = os.environ.get("KYBERDEX_CARD_STYLE", "kyber-tiers").strip() or "kyber-tiers"
+VERSION = "kyber-tiers-1" if CARD_STYLE != "hyperspace-foil" else LEGACY_VERSION
 # Layout revisions invalidate the render cache without moving existing glints.
 FINISH_SEED = "hyperspace-foil-2.1"
 DISPLAY_FIELDS = (
@@ -40,6 +43,8 @@ FINISHES = {
                   "colors": ("#806025", "#fff0ac", "#b6dcda", "#bb9cdd", "#ffe0a0"), "ink": "#f8e3a2"},
     "mythic": {"level": 5, "rim": 44, "sheen": 180, "stars": 22, "etch": 5,
                "colors": ("#91ddeb", "#f8e8bf", "#db9dac", "#c0b0ed", "#e8ffdf"), "ink": "#ffecc7"},
+    "celestial": {"level": 5, "rim": 48, "sheen": 210, "stars": 30, "etch": 5,
+                  "colors": ("#fff6d8", "#c8b8ff", "#9be8ff", "#ffd1a8", "#ffffff"), "ink": "#fff6dd"},
 }
 
 
@@ -89,6 +94,7 @@ class CardRenderer:
         self._fonts = {}
         self._font_data = None
         self._finish_texture = None
+        self._art_manifest = (None, {})
 
     @property
     def cache_info(self):
@@ -183,17 +189,38 @@ class CardRenderer:
                     return font, lines
         raise ValueError("Card text exceeds its printable area")
 
-    def render(self, card):
+    def _manifest_entry(self, card_id):
+        """Reviewed art metadata (placement boxes) for full-bleed crops; optional."""
+        path = self.root / "assets/art/manifest.json"
+        try:
+            stamp = path.stat().st_mtime_ns
+            if self._art_manifest[0] != stamp:
+                document = json.loads(path.read_text())
+                self._art_manifest = (stamp, document.get("assets", {}) if isinstance(document, dict) else {})
+        except (OSError, ValueError):
+            return None
+        entry = self._art_manifest[1].get(card_id)
+        return entry if isinstance(entry, dict) else None
+
+    def media_kind(self, card):
+        if CARD_STYLE == "hyperspace-foil":
+            return "png"
+        from .tier_render import ANIMATED
+        return "gif" if card.get("rarity") in ANIMATED else "png"
+
+    def render(self, card, *, kind="png"):
         # Validate readiness before cache access: withdrawn art cannot be served
         # just because a previously approved render remains in memory.
         if card.get("rarity") not in FINISHES:
             raise ValueError("Unknown card rarity")
+        if kind not in ("png", "gif"):
+            raise ValueError("Unknown card image kind")
         with self._lock:
             path = art_path(self.root, card)
             stamp = path.stat()
             payload = {key: card.get(key) for key in DISPLAY_FIELDS}
             key = (str(path), stamp.st_mtime_ns, stamp.st_ctime_ns, stamp.st_size,
-                   json.dumps(payload, sort_keys=True, ensure_ascii=False), VERSION)
+                   json.dumps(payload, sort_keys=True, ensure_ascii=False), VERSION, kind)
             if key in self._cache:
                 result = self._cache.pop(key)
                 self._cache[key] = result
@@ -203,12 +230,20 @@ class CardRenderer:
                 if source.width * source.height > 16_777_216 or source.width < 1 or source.height < 1:
                     raise ValueError("Card source image exceeds render bounds")
                 source.load()
-                # Approved silhouettes can extend to the source edge. Preserve
-                # the entire illustration; the narrow side gutters join the rim.
-                fitted = ImageOps.contain(source.convert("RGB"), SIZE, Image.Resampling.LANCZOS)
-                art = Image.new("RGB", SIZE, (2, 18, 36))
-                art.paste(fitted, ((SIZE[0]-fitted.width)//2, (SIZE[1]-fitted.height)//2))
-            result = self._compose(card, art)
+                if CARD_STYLE != "hyperspace-foil":
+                    from . import tier_render
+                    subject = tier_render.prepare_art(source, self._manifest_entry(card.get("id")))
+                    result = (tier_render.render_gif(self, card, subject) if kind == "gif"
+                              else tier_render.render_png(self, card, subject))
+                else:
+                    # Approved silhouettes can extend to the source edge. Preserve
+                    # the entire illustration; the narrow side gutters join the rim.
+                    fitted = ImageOps.contain(source.convert("RGB"), SIZE, Image.Resampling.LANCZOS)
+                    art = Image.new("RGB", SIZE, (2, 18, 36))
+                    art.paste(fitted, ((SIZE[0]-fitted.width)//2, (SIZE[1]-fitted.height)//2))
+                    result = None
+            if result is None:
+                result = self._compose(card, art)
             if self.max_entries and len(result) <= self.max_bytes:
                 while self._cache and (len(self._cache) >= self.max_entries or
                                        self._cache_bytes + len(result) > self.max_bytes):

@@ -466,7 +466,7 @@ async def test_orphan_trade_recovers_for_both_parties_but_not_outsiders(bot, fac
     assert restored.game.active_trades("different-guild", "101") == []
     with pytest.raises(ValueError, match="Only the named"):
         await command.callback(interaction(103), trade_id=trade["id"])
-    assert restored.game.active_trades("42", "101", now=time.time()+1000) == []
+    assert restored.game.active_trades("42", "101", now=time.time()+3700) == []
     assert restored.game.info("42", "101", item["id"])["locked_by"] is None
 
 

@@ -35,15 +35,41 @@ def build(tmp_path, document, **kwargs):
 def test_production_scarcity_holds_across_lane_exhaustion_states(document):
     report = audit_economy(document["cards"])
     assert report["ready"]
+    assert report["card_weight_basis"] == "notability-v1"
     assert sum(r["definitions"] for r in report["tiers"].values()) == 835
-    assert min(row["ratio"] for row in report["adjacent_scarcity_checks"]) >= 1.12
-    assert report["adjacent_scarcity_checks"][-1]["ratio"] == pytest.approx(33/29)
-    # Five additional Legendary definitions exceed the remaining margin.
-    extra = copy.deepcopy(next(c for c in document["cards"] if c["rarity"] == "legendary" and not c.get("release")))
-    additions = [dict(extra, id=f"additional-reviewed-legendary-{index}") for index in range(5)]
-    report = audit_economy(document["cards"] + additions)
+    # Like-for-like and tier-average scarcity keep a clear margin in every lane state.
+    assert min(row["ratio"] for row in report["adjacent_scarcity_checks"]) >= 1.25
+    # Pushing one Mythic far above its notability band breaks the like-for-like rule.
+    boosted = copy.deepcopy(document["cards"])
+    mythic = next(c for c in boosted if c["rarity"] == "mythic" and not c.get("release"))
+    mythic["weight"] *= 40
+    report = audit_economy(boosted)
     assert not report["ready"]
     assert "ordinary_scarcity_inversion:legendary:mythic" in report["violations"]
+
+
+def test_notability_reorders_cards_within_a_tier_without_moving_tier_odds(tmp_path, document):
+    game = build(tmp_path, document)
+    pool = {r["id"]: r for r in game.spawn_pool(now=NOW)}
+    rare = [game.catalog[key] for key in pool if game.catalog[key]["rarity"] == "rare"]
+    iconic = max(rare, key=lambda c: c["notability"])
+    obscure = min(rare, key=lambda c: c["notability"])
+    assert pool[iconic["id"]]["probability"] > 5 * pool[obscure["id"]]["probability"]
+    for rarity, mass in game.spawn_weights.items():
+        assert sum(r["probability"] for r in pool.values()
+                   if game.catalog[r["id"]]["rarity"] == rarity) == pytest.approx(mass/10000)
+
+
+def test_flat_weights_keep_strict_per_card_scarcity(document):
+    flat = copy.deepcopy(document["cards"])
+    base = {"common": 120, "uncommon": 80, "rare": 50, "epic": 30, "legendary": 15, "mythic": 6}
+    for card in flat:
+        card.pop("notability", None)
+        if card["weight"] > 0:
+            card["weight"] = base[card["rarity"]]
+    report = audit_economy(flat)
+    assert report["ready"] and report["card_weight_basis"] == "flat"
+    assert report["adjacent_scarcity_checks"][-1]["ratio"] == pytest.approx(33/29)
 
 
 def test_old_odds_fail_even_without_seasons(document):
@@ -94,8 +120,8 @@ def test_legacy_schema2_retains_old_weights_and_flat_distribution(tmp_path, docu
         document["rarities"][rarity]["spawn_weight"] = weight
     game = build(tmp_path, document, enabled_releases=("autumn-2026",))
     pool = {r["id"]: r for r in game.spawn_pool(now=NOW)}
-    eligible_rare_count = sum(game.catalog[key]["rarity"] == "rare" for key in pool)
-    assert pool["rex-umbara"]["probability"] == pytest.approx(.10/eligible_rare_count)
+    rare_weight = sum(game.catalog[key]["weight"] for key in pool if game.catalog[key]["rarity"] == "rare")
+    assert pool["rex-umbara"]["probability"] == pytest.approx(.10*game.catalog["rex-umbara"]["weight"]/rare_weight)
 
 
 @pytest.mark.parametrize("explicit_revision", [False, True])

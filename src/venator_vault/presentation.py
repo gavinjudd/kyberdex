@@ -12,7 +12,7 @@ from aiohttp import ClientError
 from .references import lore_references
 
 COLORS = {"common": 0x98A8B8, "uncommon": 0x5CC6A0, "rare": 0x67B9EF,
-          "epic": 0xAD8FEF, "legendary": 0xE5B86B, "mythic": 0xEA818A}
+          "epic": 0xAD8FEF, "legendary": 0xE5B86B, "mythic": 0xEA818A, "celestial": 0xFFF1C7}
 BRAND = 0xD8B780
 DISCORD_IO_TIMEOUT = 15.0
 DISCORD_ERRORS = (discord.HTTPException, discord.ConnectionClosed, OSError, ClientError)

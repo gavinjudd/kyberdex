@@ -2,7 +2,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   const keys = ['arena','subject_type','faction','era','rarity','category','role'];
-  const rarityOrder = ['common','uncommon','rare','epic','legendary','mythic'];
+  const rarityOrder = ['common','uncommon','rare','epic','legendary','mythic','celestial'];
   const model = {cards:[],rarities:{},filters:Object.fromEntries(keys.map(k=>[k,''])),search:'',sort:'catalog',view:'regular',limit:24,availableArt:null,now:Date.now(),activeTierWeight:0,tierCardWeights:{},laneCardWeights:{},tierFirst:false,releaseLanes:false,limitedShare:0};
   const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const clean = value => String(value ?? '').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/ß/g,'ss').replace(/ς/g,'σ').replace(/[^\p{L}\p{N}]+/gu,' ').trim();

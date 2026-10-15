@@ -9,7 +9,7 @@ uv run venator-vault check --require-art
 
 The installer fetches recorded sources and reproduces the expected reviewed
 pixels for the catalog. Downloads are cached and setup can be rerun after an
-interruption. The 851 card definitions use 847 distinct PNG files; you do not
+interruption. The 871 card definitions use 847 distinct PNG files; you do not
 need to find the images individually.
 
 Downloaded images and the generated manifest stay local. This directory is

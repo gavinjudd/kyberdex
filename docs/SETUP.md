@@ -131,7 +131,7 @@ uv run venator-vault check --require-art
 
 The setup command downloads recorded sources, reproduces the recorded image transforms and installs assets only when they match the expected reviewed pixels. The first setup downloads about 175 MB of source files; it uses a local cache and can be rerun after an interrupted download. Source images and generated PNGs remain local and ignored by Git.
 
-The catalog contains 851 definitions backed by 847 distinct PNG files; some treatments share an asset. See [artwork setup](ASSETS.md) for retry behavior, source notices and replacing images with your own. The downloader does not grant copyright permission.
+The catalog contains 871 definitions backed by 847 distinct PNG files; some treatments share an asset. See [artwork setup](ASSETS.md) for retry behavior, source notices and replacing images with your own. The downloader does not grant copyright permission.
 
 The default startup contract also requires at least 800 distinct regular subjects and reviewed combat profiles. Reducing the catalog to a few cards requires a deliberate engine/test change; it is not a supported configuration shortcut. Enabled future releases are checked before their release window begins.
 
