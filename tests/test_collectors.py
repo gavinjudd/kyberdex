@@ -221,7 +221,7 @@ def test_legacy_two_slot_migration_preserves_claims_supply_and_new_one_slot_poli
     new = game.create_drop("guild", "old", "mythic", now=NOW+2)
     assert new["collector_limit"] == 1
     restarted = build(game_case)
-    assert restarted.health()["schema_version"] == 7
+    assert restarted.health()["schema_version"] == 8
     assert restarted.get_drop("legacy")["collector_limit"] == 2
     assert stock(restarted, "mythic") == (2, 1)
     with contextlib.closing(sqlite3.connect(game_case[0])) as connection:

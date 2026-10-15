@@ -187,7 +187,7 @@ class CatalogSemanticsTests(unittest.TestCase):
         self.assertGreater(jecki["health"], cards["osha-aniseya"]["health"])
 
     def test_every_production_profile_excludes_narrative_importance(self):
-        self.assertEqual(len(self.game.catalog), 851)
+        self.assertEqual(len(self.game.catalog), 871)
         for card in self.game.catalog.values():
             with self.subTest(card=card["id"]):
                 self.assertNotIn("importance", card["power_profile"])

@@ -7,6 +7,8 @@ import json
 import logging
 import math
 import os
+import re
+import secrets
 import signal
 import socket
 import time
@@ -18,7 +20,7 @@ from discord.ext import tasks
 
 from .card_render import CardRenderer
 from .config import Settings
-from .core import RARITIES, Game, GameError, collector_limit
+from .core import ALL_RARITIES, RARITIES, Game, GameError, collector_limit
 from .presentation import (
     DISCORD_ERRORS,
     art_path,
@@ -61,6 +63,27 @@ CARD_IMAGE_FIELDS = (
 )
 
 
+HINT_UNLOCK = 20
+HINT_LETTER = 45
+HINT_MASK = 110
+
+
+def capture_hint(drop, age):
+    """Progressive private hints; they never change the capture window."""
+    card = drop["card"]
+    hint = f"**{card['faction']}** · {card['era']} · {card['arena'].title()}"
+    name = re.split(r"\s+[—–]\s+", card["name"], maxsplit=1)[0]
+    words = name.split()
+    if age >= HINT_MASK:
+        masked = " ".join(word[0] + "".join("·" if ch.isalnum() else ch for ch in word[1:]) for word in words)
+        hint += f"\nName pattern: **{masked}**"
+    elif age >= HINT_LETTER:
+        hint += (f"\nThe name starts with **{name[0]}** and has **{len(words)}** word{'s' if len(words) != 1 else ''}.")
+    hint += ("\nPunctuation and capitalization don't matter, and a small typo in a longer name is fine."
+             f"\nCapture stays open until <t:{int(drop['expires_at'])}:R>, unless all slots are claimed.")
+    return hint
+
+
 def collector_rules():
     limits = " · ".join(f"{rarity.title()} {collector_limit({'rarity': rarity, 'category': 'canon'})}"
                         for rarity in RARITIES)
@@ -101,7 +124,8 @@ class CaptureModal(discord.ui.Modal, title="Identify this encounter"):
         try:
             drop = await self.bot.call("get_drop", self.drop_id)
             self.bot.verify_guild(drop, interaction)
-            result = await self.bot.call("claim", self.drop_id, str(interaction.user.id), str(self.answer))
+            result = await self.bot.call("claim", self.drop_id, str(interaction.user.id), str(self.answer),
+                                         request_id=str(interaction.id) if getattr(interaction, "id", None) else None)
             instance = result["instance"]
             embed = card_panel(instance["card"], instance)
             embed.title = (("Previously captured · " if result.get("replayed") else "Captured · ") + instance["name"])[:256]
@@ -114,7 +138,7 @@ class CaptureModal(discord.ui.Modal, title="Identify this encounter"):
             embed.description = (receipt + biography)[:budget] or None
             file = await self.bot.card_image(instance["card"],instance)
             if file is not None:
-                embed.set_image(url="attachment://card.png")
+                embed.set_image(url=f"attachment://{file.filename}")
             await reply(interaction, embed=embed,file=file)
             await self.bot.refresh_drop(result["drop"])
         except (GameError, ValueError) as error:
@@ -211,9 +235,17 @@ class VaultBot(discord.Client):
         if instance:
             public.update({key: instance[key] for key in ("attack", "health", "speed") if key in instance})
         try:
+            kind = self.card_renderer.media_kind(public)
             async with self.card_render_slots:
-                rendered = await asyncio.to_thread(self.card_renderer.render, public)
-            return discord.File(io.BytesIO(rendered), filename="card.png")
+                try:
+                    rendered = await asyncio.to_thread(self.card_renderer.render, public, kind=kind)
+                except Exception as error:
+                    if kind == "png":
+                        raise
+                    log.warning("Animated card unavailable, using still: %s", type(error).__name__)
+                    kind = "png"
+                    rendered = await asyncio.to_thread(self.card_renderer.render, public, kind=kind)
+            return discord.File(io.BytesIO(rendered), filename=f"card.{kind}")
         except Exception as error:  # noqa: BLE001 - committed captures/crafts keep their successful receipt
             log.warning("Composed card image unavailable: %s", type(error).__name__)
             return None
@@ -436,7 +468,7 @@ class VaultBot(discord.Client):
                 from .features import OfferModal
                 values = [item.get("value", "") for row in interaction.data.get("components", [])
                           for item in row.get("components", []) if item.get("custom_id") == "copies"]
-                if len(values) == 1 and len(values[0]) <= 100:
+                if len(values) == 1 and len(values[0]) <= 200:
                     modal = OfferModal(self, custom_id.removeprefix("vv:offer-submit:"))
                     modal.copies._value = values[0]
                     await modal.on_submit(interaction)
@@ -469,16 +501,13 @@ class VaultBot(discord.Client):
                     await reply(interaction, content=f"This encounter has ended. It was **{drop['card']['name']}**.")
                     return
                 age = time.time() - drop["created_at"]
-                if age < 35:
-                    await reply(interaction, content=f"A hint unlocks in {max(1, int(35-age))} seconds. You can still capture now.")
+                if age < HINT_UNLOCK:
+                    await reply(interaction, content=f"A hint unlocks in {max(1, int(HINT_UNLOCK-age))} seconds. You can still capture now.")
                 else:
-                    card = drop["card"]
-                    hint = f"**{card['faction']}** · {card['era']} · {card['arena'].title()}"
-                    if age >= 90:
-                        hint += f"\nThe name starts with **{card['name'][0]}**. Punctuation and capitalization do not matter."
-                    hint += (f"\nCapture stays open until <t:{int(drop['expires_at'])}:R>, "
-                             "unless all slots are claimed. Hints do not shorten the timer.")
-                    await reply(interaction, content=hint)
+                    await reply(interaction, content=capture_hint(drop, age))
+                return
+            if action in ("confirmclear", "cancelclear"):
+                await self.handle_inventory_clear(interaction, action, entity)
                 return
             from .features import handle_component
             await handle_component(self, interaction, action, entity)
@@ -487,6 +516,26 @@ class VaultBot(discord.Client):
         except Exception as error:  # noqa: BLE001 - interaction boundary must return a safe response
             log.error("Component failed: %s", type(error).__name__)
             await reply(interaction, content="That control could not finish. Use the matching /vault command to reopen it.")
+
+    async def handle_inventory_clear(self, interaction, action, key):
+        pending = self.pending_confirmations.get(key)
+        if not pending or pending.get("kind") != "inventory_clear" or pending["expires"] < time.time():
+            raise ValueError("This confirmation expired. Run /vault-admin clear-inventory again.")
+        if (pending["user"], pending["guild"]) != (str(interaction.user.id), str(interaction.guild_id)):
+            raise ValueError("Only the manager who started this clear can confirm it.")
+        if not getattr(getattr(interaction, "permissions", None), "manage_guild", False):
+            raise ValueError("This needs Manage Server permission.")
+        self.pending_confirmations.pop(key, None)
+        if action == "cancelclear":
+            await reply(interaction, content="Cancelled. Nothing was removed.")
+            return
+        await discord_request(interaction.response.defer(ephemeral=True))
+        result = await self.call("admin_clear_inventory", pending["guild"], pending["user"], pending["target"], request_id=key)
+        await self.runtime_call("audit", interaction.user.id, "inventory_clear",
+                                {"guild_id": pending["guild"], "target": pending["target"], "clear_id": result["id"],
+                                 "cards": len(result["instance_ids"])})
+        await reply(interaction, content=(f"Cleared **{len(result['instance_ids'])}** cards from <@{pending['target']}>. "
+                                          f"Undo reference: `{result['id']}` (use `/vault-admin restore-inventory`)."))
 
     async def post_drop(self, guild_id, channel_id, card_id=None, *, force=False, rarity=None, request_id=None):
         async with self.post_lock:
@@ -762,11 +811,11 @@ class VaultCommands(app_commands.Group, name="vault", description="Your Venator 
         embed = panel("Welcome to KyberDex", "**A galaxy of cards. Rarer encounters, fewer collector slots.**\n"
                       "Scheduled drops appear in the configured channel. Press Capture and identify the image. "
                       "Each encounter shows how many distinct collectors can win. Names ignore case, spacing and punctuation; "
-                      "titles are optional and distinctive name parts work. Hints unlock after 35 seconds.")
+                      "titles are optional, distinctive name parts work, and a small typo in a longer name is forgiven. Hints unlock after 20 seconds and get stronger over time.")
         for name, value in [
             ("Start collecting", "`/vault collection` — your cards\n`/vault catalog` — the full archive\n`/vault card` — publicly show a card you own"),
             ("Build your vault", "`/vault daily` · `/vault market` · `/vault favorite` · `/vault wishlist`\n`/vault recipes` · `/vault craft` · `/vault salvage`"),
-            ("Play together", "`/vault trade` — both players review and confirm\n`/vault deck` · `/vault duel` — Ground and Fleet arenas\n`/vault raid` — join a cooperative encounter"),
+            ("Play together", "`/vault trade` — swap cards (one-sided offers are fine)\n`/vault give` — gift cards to someone\n`/vault gamble` — coin flips, slots and wagers (credits only)\n`/vault deck` · `/vault duel` — Ground and Fleet arenas\n`/vault raid` — join a cooperative encounter"),
             ("Capture rules", collector_rules()),
             ("How drops work", ("Regular drops draw rarity first, then a card within that tier. An admin's equal-chance hour gives each available card the same odds. Favorites stay protected. "
              "After two consecutive captures in this server, wait for another member to capture successfully; taking a second slot counts too. "
@@ -776,12 +825,15 @@ class VaultCommands(app_commands.Group, name="vault", description="Your Venator 
              "at most one minute total; per-member cooldowns and contribution caps limit repeated messages.")),
         ]:
             embed.add_field(name=name, value=value, inline=False)
-        from .features import start_view
+        from .features import start_view, starter_notice
+        notice = await starter_notice(self.bot, interaction)
+        if notice:
+            embed.description = notice + "\n\n" + embed.description
         embed.add_field(name="Report a problem",value="`/vault complain message:...` — send feedback privately to the bot's maintainers",inline=False)
         await reply(interaction, embed=embed,view=start_view())
 
     @app_commands.command(name="catalog", description="Search every card definition, including cards you do not own")
-    @app_commands.choices(rarity=[app_commands.Choice(name=rarity.title(),value=rarity) for rarity in RARITIES])
+    @app_commands.choices(rarity=[app_commands.Choice(name=rarity.title(),value=rarity) for rarity in ALL_RARITIES])
     @app_commands.autocomplete(search=autocomplete_card)
     async def catalog(self, interaction, search: str = "", rarity: str = "", page: app_commands.Range[int, 1, 100] = 1):
         await discord_request(interaction.response.defer(ephemeral=True))
@@ -801,13 +853,13 @@ class VaultCommands(app_commands.Group, name="vault", description="Your Venator 
         embed = card_panel(definition, instance)
         file = await self.bot.card_image(definition, instance)
         if file is not None:
-            embed.set_image(url="attachment://card.png")
+            embed.set_image(url=f"attachment://{file.filename}")
         # Rendering runs in a worker; recheck ownership before publishing its result.
         await self.bot.call("info", str(interaction.guild_id), str(interaction.user.id), instance["id"])
         await reply(interaction, embed=embed, file=file, ephemeral=False)
 
     @app_commands.command(name="collection", description="Browse only the card copies you own")
-    @app_commands.choices(rarity=[app_commands.Choice(name=rarity.title(),value=rarity) for rarity in RARITIES])
+    @app_commands.choices(rarity=[app_commands.Choice(name=rarity.title(),value=rarity) for rarity in ALL_RARITIES])
     @app_commands.autocomplete(search=autocomplete_owned_card)
     async def collection(self, interaction, search: str = "", rarity: str = "", page: app_commands.Range[int, 1, 1000] = 1):
         await discord_request(interaction.response.defer(ephemeral=True))
@@ -886,6 +938,37 @@ class AdminCommands(app_commands.Group, name="vault-admin", description="Configu
         return [app_commands.Choice(name=f"Report {record['id']} · player {record['user_id']}",value=record['id'])
                 for record in records if current in record['id']][:25]
 
+    async def autocomplete_failed_card(self, interaction, current):
+        if (interaction.guild_id != self.bot.settings.guild_id or interaction.user.bot
+            or not interaction.permissions.manage_guild):
+            return []
+        cards = [card for card in self.bot.game.catalog.values()
+                 if self.bot.game.matches_card(card['id'], current)]
+        cards.sort(key=lambda card: (not card['name'].casefold().startswith(current.casefold()), card['name']))
+        return [app_commands.Choice(name=card['name'][:100], value=card['id']) for card in cards[:25]]
+
+    @app_commands.command(name="failed-names", description="Review rejected capture names for missing valid aliases")
+    @app_commands.describe(page="Five name groups per page, newest first", card="Optionally filter by expected card")
+    @app_commands.autocomplete(card=autocomplete_failed_card)
+    async def failed_names(self, interaction, page: app_commands.Range[int, 1, 1000000] = 1, card: str = ""):
+        await discord_request(interaction.response.defer(ephemeral=True, thinking=True))
+        rows = await self.bot.call("failed_guesses", str(interaction.guild_id), page, card)
+        description = (f"Page {page} · Rejected names grouped by expected card and normalized guess.\n"
+                       "Review candidates only; logging does not change accepted names. "
+                       "The attached JSON includes matching rules for comparison.") if rows else (
+                           "No rejected names on this page. Logging starts with this update; earlier guesses were not saved.")
+        embed = panel("Rejected capture names", description)
+        for row in rows:
+            guess = discord.utils.escape_mentions(discord.utils.escape_markdown(row['latest_guess']))
+            status = "Accepted by current rules" if row['accepted_now'] else "Still rejected by current rules"
+            value = (f"Guess: {guess or '(empty)'}\n"
+                     f"{row['attempts']} attempts · {row['players']} players\n"
+                     f"First <t:{int(row['first_at'])}:f> · Latest <t:{int(row['last_at'])}:f>\n{status}")
+            embed.add_field(name=f"Expected: {row['card_name']}"[:256], value=value[:1024], inline=False)
+        payload = {"page": page, "page_size": 5, "card_id": card or None, "groups": rows}
+        await reply(interaction, embed=embed, file=discord.File(
+            io.BytesIO(json.dumps(payload, ensure_ascii=False, indent=2).encode()), filename="rejected-capture-names.json"))
+
     @app_commands.command(name="complaints",description="Read private player reports or mark one reviewed")
     @app_commands.autocomplete(resolved_id=autocomplete_complaint)
     async def complaints(self,interaction,page:app_commands.Range[int,1,1000]=1,resolved_id:str=""):
@@ -955,6 +1038,86 @@ class AdminCommands(app_commands.Group, name="vault-admin", description="Configu
                                     {"guild_id": str(interaction.guild_id), "message_id": str(message.id),
                                      "card_id": card or None, "rarity": rarity or None})
         await reply(interaction, content=f"Encounter posted: {message.jump_url}")
+
+    @app_commands.command(name="give", description="Put fresh copies of any card straight into a member's collection")
+    @app_commands.autocomplete(card=autocomplete_failed_card)
+    @app_commands.describe(member="Who receives the card", card="Any card in the catalog", count="How many copies (1–10)",
+                           note="Optional reason, shown in the public announcement", announce="Post a public message about it")
+    async def give(self, interaction, member: discord.Member, card: str, count: app_commands.Range[int, 1, 10] = 1,
+                   note: app_commands.Range[str, 0, 200] = "", announce: bool = True):
+        await discord_request(interaction.response.defer(ephemeral=True, thinking=True))
+        if member.bot:
+            raise ValueError("Choose a person, not a bot.")
+        if card not in self.bot.game.catalog:
+            raise ValueError("Pick a card from the autocomplete list.")
+        result = await self.bot.call("admin_grant", str(interaction.guild_id), str(interaction.user.id), str(member.id),
+                                     card, count, note=note or None, request_id=str(interaction.id))
+        await self.bot.runtime_call("audit", interaction.user.id, "admin_grant",
+                                    {"guild_id": str(interaction.guild_id), "to": str(member.id), "card_id": card,
+                                     "count": count, "transfer_id": result["id"]})
+        definition = self.bot.game.catalog[card]
+        label = f"{count}× **{definition['name']}**" if count > 1 else f"**{definition['name']}**"
+        if announce and not result.get("replayed"):
+            text = f"🎁 {member.mention} received {label} ({definition['rarity'].title()}) from the server team."
+            if note:
+                text += f"\n> {discord.utils.escape_mentions(note)}"
+            try:
+                await discord_request(interaction.channel.send(content=text, allowed_mentions=discord.AllowedMentions(
+                    users=[member], everyone=False, roles=False)))
+            except DISCORD_ERRORS as error:
+                log.warning("Grant announcement skipped: %s", type(error).__name__)
+        await reply(interaction, content=(f"Already granted earlier (no duplicate made): {label} → {member.mention}." if result.get("replayed")
+                                          else f"Granted {label} to {member.mention}. Copy IDs: " +
+                                          ", ".join(f"`{key}`" for key in result["instance_ids"])))
+
+    async def autocomplete_clear(self, interaction, current):
+        if (interaction.guild_id != self.bot.settings.guild_id or interaction.user.bot
+                or not interaction.permissions.manage_guild):
+            return []
+        try:
+            rows = await asyncio.wait_for(self.bot.call("inventory_clears", str(interaction.guild_id)), 1.8)
+        except (TimeoutError, OSError):
+            return []
+        return [app_commands.Choice(name=f"{row['id']} · member {row['target_id']} · {len(row['instance_ids'])} cards"
+                                    + (" · undone" if row["restored_at"] else ""), value=row["id"])
+                for row in rows if current in row["id"]][:25]
+
+    @app_commands.command(name="clear-inventory", description="Remove every card a member owns (asks for confirmation; can be undone)")
+    @app_commands.describe(member="Whose collection to clear")
+    async def clear_inventory(self, interaction, member: discord.Member):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        rows = await self.bot.call("inventory", str(interaction.guild_id), str(member.id), limit=100)
+        if not rows:
+            raise ValueError(f"{member.display_name} has no cards to clear.")
+        key = secrets.token_hex(12)
+        self.bot.pending_confirmations = {k: v for k, v in self.bot.pending_confirmations.items() if v["expires"] > time.time()}
+        self.bot.pending_confirmations[key] = {"kind": "inventory_clear", "guild": str(interaction.guild_id),
+                                               "user": str(interaction.user.id), "target": str(member.id),
+                                               "expires": time.time() + 120}
+        count = f"{len(rows)}{'+' if len(rows) == 100 else ''}"
+        view = discord.ui.View(timeout=120)
+        view.add_item(discord.ui.Button(label=f"Clear {count} cards", style=discord.ButtonStyle.danger,
+                                        custom_id=f"vv:confirmclear:{key}"))
+        view.add_item(discord.ui.Button(label="Cancel", style=discord.ButtonStyle.secondary, custom_id=f"vv:cancelclear:{key}"))
+        await reply(interaction, content=(f"This removes all **{count}** cards from {member.mention}'s collection, "
+                                          "empties their decks and cancels their open trades. Credits stay. "
+                                          "You'll get a reference to undo it with `/vault-admin restore-inventory`."), view=view)
+
+    @app_commands.command(name="restore-inventory", description="Undo an inventory clear")
+    @app_commands.autocomplete(clear_id=autocomplete_clear)
+    async def restore_inventory(self, interaction, clear_id: str):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        result = await self.bot.call("admin_restore_inventory", str(interaction.guild_id), str(interaction.user.id), clear_id)
+        await self.bot.runtime_call("audit", interaction.user.id, "inventory_restore",
+                                    {"guild_id": str(interaction.guild_id), "clear_id": clear_id, "restored": result["restored"]})
+        await reply(interaction, content=f"Restored **{result['restored']}** cards to <@{result['target_id']}>.")
+
+    @app_commands.command(name="gambling", description="Turn credit gambling on or off for this server")
+    async def gambling(self, interaction, enabled: bool):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        await self.bot.call("set_gambling", str(interaction.guild_id), enabled)
+        await self.bot.runtime_call("audit", interaction.user.id, "gambling", {"guild_id": str(interaction.guild_id), "enabled": enabled})
+        await reply(interaction, content="Gambling is on." if enabled else "Gambling is paused. Pending wagers can't be accepted.")
 
     @app_commands.command(name='event', description='Start, inspect or stop a one-hour equal-chance card event')
     @app_commands.choices(action=[app_commands.Choice(name='Start one-hour event', value='start'),

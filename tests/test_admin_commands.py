@@ -240,4 +240,4 @@ async def test_autocomplete_cancellation_keeps_one_shared_art_validation_task(ha
     with pytest.raises(asyncio.CancelledError):
         await task
     ready = await bot.admin_card_ids()
-    assert len(ready) == 851 and len(count) == 851
+    assert len(ready) == 871 and len(count) == 871

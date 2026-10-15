@@ -292,7 +292,7 @@ def test_schema2_migration_keeps_original_publication_clock_and_claims(tmp_path)
         db.commit()
     migrated = publication_game(tmp_path)
     stored = migrated.get_drop(drop["id"])
-    assert migrated.health()["schema_version"] == 7
+    assert migrated.health()["schema_version"] == 8
     assert (stored["created_at"], stored["expires_at"], stored["delivery_pending"]) == (now, now+180, 0)
     assert stored["claims"][0]["instance_id"] == copy_id
     assert migrated.info("g", "a", copy_id)["card_id"] == "test-card"

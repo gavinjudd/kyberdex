@@ -11,7 +11,18 @@ import time
 import discord
 from discord import app_commands
 
-from .core import CRAFT_RECIPES, RARITIES, Game, GameError
+from .core import (
+    CRAFT_RECIPES,
+    GAMBLE_MAX,
+    GAMBLE_MIN,
+    GIFT_MAX,
+    RARITIES,
+    SLOT_SYMBOLS,
+    TRADE_MAX_PER_SIDE,
+    WAGER_HOUSE_PERCENT,
+    Game,
+    GameError,
+)
 from .presentation import DISCORD_ERRORS, action_view, card_panel, discord_request, panel
 
 log = logging.getLogger("venator_vault")
@@ -61,36 +72,37 @@ async def copy_choices(bot, interaction, current, *, limit=5):
 
 def offer_picker(trade, rows, user):
     view = discord.ui.View(timeout=180)
+    offered = {item["id"] for item in trade["offers"].get(user, [])}
+    rows = [row for row in rows if not row.get("locked_by") or row["id"] in offered]
     if rows:
-        offered = {item["id"] for item in trade["offers"].get(user, [])}
         options = [discord.SelectOption(label=row["name"][:100], value=row["id"],
-                    description=f"{row['attack']} ATK / {row['health']} HP · {row['id']}",
+                    description=f"{row['card']['rarity'].title()} · {row['attack']} ATK / {row['health']} HP · {row['id']}"[:100],
                     default=row["id"] in offered) for row in rows[:25]]
-        view.add_item(discord.ui.Select(custom_id=f"vv:offerpick:{trade['id']}", placeholder="Choose up to five card copies",
-                                       options=options, min_values=0, max_values=min(5, len(options))))
+        view.add_item(discord.ui.Select(custom_id=f"vv:offerpick:{trade['id']}", placeholder="Choose the copies you'll hand over",
+                                       options=options, min_values=0, max_values=min(TRADE_MAX_PER_SIDE, len(options))))
     view.add_item(discord.ui.Button(label="Enter copy IDs instead", custom_id=f"vv:offercustom:{trade['id']}",
                                    style=discord.ButtonStyle.secondary))
     return view
 
 
 def trade_panel(trade):
-    embed = panel("Trade table", f"Status: **{trade['status']}** · Offer revision **{trade['version']}**\n"
-                  "Both collectors must confirm this exact revision. Any offer change clears both confirmations. "
-                  "Values below use the published rarity table, not guessed market prices.")
+    embed = panel("Trade table", f"<@{trade['a']}> ⇄ <@{trade['b']}> · Status: **{trade['status']}**\n"
+                  "Each side adds cards with **Choose my offer** (leaving your side empty is fine — that makes it a gift). "
+                  "When both of you press **Confirm**, the cards swap. Changing an offer resets both confirmations.")
     for user in (trade["a"], trade["b"]):
         items = trade["offers"].get(user, [])
-        text = "\n".join(f"**{i['name']}** · {i['card']['rarity']} · {i['attack']} ATK / {i['health']} HP · `{i['id']}`" for i in items) or "No cards offered."
-        text += f"\nReference value: **{trade['values'].get(user, 0)}** · {'Confirmed' if trade['accepted'].get(user) else 'Review pending'}"
-        embed.add_field(name=f"Collector {user}", value=text[:1024], inline=False)
+        text = "\n".join(f"**{i['name']}** · {i['card']['rarity'].title()} · {i['attack']} ATK / {i['health']} HP" for i in items) or "Nothing offered yet."
+        text += f"\n{'✅ Confirmed' if trade['accepted'].get(user) else '⏳ Not confirmed'}"
+        embed.add_field(name="Offer from", value=f"<@{user}>\n{text}"[:1024], inline=True)
     embed.description += f"\nExpires <t:{int(trade['expires_at'])}:R>."
-    embed.set_footer(text=f"Trade {trade['id']} · No real-money value")
+    embed.set_footer(text=f"Trade {trade['id']} · revision {trade['version']} · No real-money value")
     return embed
 
 
 def trade_view(trade):
     return action_view([
         ("Choose my offer", "offer", trade["id"], discord.ButtonStyle.secondary),
-        ("Confirm this offer", f"accept{trade['version']}", trade["id"], discord.ButtonStyle.success),
+        ("Confirm", f"accept{trade['version']}", trade["id"], discord.ButtonStyle.success),
         ("Cancel trade", "canceltrade", trade["id"], discord.ButtonStyle.danger),
     ], disabled=trade["status"] != "open")
 
@@ -203,8 +215,8 @@ async def refresh_raid(bot, raid):
 
 
 class OfferModal(discord.ui.Modal, title="Choose your trade offer"):
-    copies = discord.ui.TextInput(label="Copy IDs (maximum five)", placeholder="Paste IDs from /vault collection; blank clears your offer",
-                                 required=False, max_length=100, style=discord.TextStyle.paragraph, custom_id="copies")
+    copies = discord.ui.TextInput(label="Copy IDs (maximum ten)", placeholder="Paste IDs from /vault collection; blank clears your offer",
+                                 required=False, max_length=200, style=discord.TextStyle.paragraph, custom_id="copies")
 
     def __init__(self, bot, trade_id):
         super().__init__(timeout=180, custom_id=f"vv:offer-submit:{trade_id}")
@@ -220,7 +232,7 @@ class OfferModal(discord.ui.Modal, title="Choose your trade offer"):
         try:
             trade = await self.bot.call("get_trade", self.trade_id)
             self.bot.verify_guild(trade, interaction)
-            trade = await self.bot.call("trade_offer", self.trade_id, str(interaction.user.id), ids_from_text(str(self.copies)))
+            trade = await self.bot.call("trade_offer", self.trade_id, str(interaction.user.id), ids_from_text(str(self.copies), TRADE_MAX_PER_SIDE))
             await reply(interaction, embed=trade_panel(trade), view=trade_view(trade))
             await refresh_trade(self.bot, trade)
         except Exception as error:  # noqa: BLE001 - modal errors use the central safe responder
@@ -319,8 +331,11 @@ async def browse_cards(bot,interaction,kind,search="",rarity="",page=1,key=None,
                                        "page":page,"user":user,"guild":guild,"expires":time.time()+300}
     state=bot.pending_confirmations[key]
     if kind=="collection":
+        notice=await starter_notice(bot,interaction) if page==1 and not edit else ""
         rows=await bot.call("inventory",guild,user,search=search,rarity=rarity,limit=13,offset=(page-1)*12)
         embed=collection_panel(rows[:12],user,page-1)
+        if notice:
+            embed.description=(notice+"\n\n"+(embed.description or ""))[:4096]
         has_next=len(rows)>12
     else:
         cards=[card for card in bot.game.catalog.values() if (not rarity or card["rarity"]==rarity)
@@ -344,6 +359,40 @@ async def browse_cards(bot,interaction,kind,search="",rarity="",page=1,key=None,
         await discord_request(interaction.edit_original_response(embed=embed,view=view))
     else:
         await reply(interaction,embed=embed,view=view)
+
+
+SLOT_ICONS = {"Kyber Crystal": "💎", "Death Star": "🌑", "Millennium Falcon": "🛸", "X-wing": "✈️", "TIE Fighter": "🔷", "Blaster": "🔫"}
+GAMBLE_FOOTER = "Credits only · credits can't be bought or cashed out · no cards are ever at stake"
+
+
+def wager_panel(wager):
+    status = wager["status"]
+    if status == "settled":
+        result = wager.get("result") or {}
+        text = (f"<@{wager['a']}> vs <@{wager['b']}> for **{wager['stake']:,} credits** each.\n"
+                f"🏆 **<@{wager['winner']}> wins {result.get('prize', 0):,} credits** ({WAGER_HOUSE_PERCENT}% of the pot goes to the house).")
+    elif status == "pending":
+        text = (f"<@{wager['a']}> challenges <@{wager['b']}> to a **{wager['stake']:,}-credit** coin toss.\n"
+                f"Winner takes the pot minus {WAGER_HOUSE_PERCENT}%. Expires <t:{int(wager['expires_at'])}:R>.")
+    else:
+        text = f"Wager between <@{wager['a']}> and <@{wager['b']}> was {status}. No credits moved."
+    embed = panel("Credit wager", text)
+    embed.set_footer(text=GAMBLE_FOOTER)
+    return embed
+
+
+def wager_view(wager):
+    return action_view([("Accept", "wageraccept", wager["id"], discord.ButtonStyle.success),
+                        ("Decline / cancel", "wagerdecline", wager["id"], discord.ButtonStyle.secondary)],
+                       disabled=wager["status"] != "pending")
+
+
+async def announce_big_win(bot, interaction, text):
+    try:
+        await discord_request(interaction.channel.send(content=text, allowed_mentions=discord.AllowedMentions(
+            users=[interaction.user], everyone=False, roles=False)))
+    except (DISCORD_ERRORS + (AttributeError,)) as error:
+        log.warning("Big-win announcement skipped: %s", type(error).__name__)
 
 
 async def handle_component(bot, interaction, action, entity):
@@ -401,7 +450,7 @@ async def handle_component(bot, interaction, action, entity):
         embed.description=(note+"\nUse /vault card if you want to show your copy publicly.\n"+biography)[:budget]
         file=await bot.card_image(instance["card"],instance)
         if file is not None:
-            embed.set_image(url="attachment://card.png")
+            embed.set_image(url=f"attachment://{file.filename}")
         await reply(interaction,embed=embed,file=file)
         return
     if action in ("opencollection","openground","openfleet","openraid"):
@@ -488,12 +537,15 @@ async def handle_component(bot, interaction, action, entity):
             return
         await discord_request(interaction.response.defer(ephemeral=True))
         result = await bot.call(pending["method"], *pending["args"], **pending.get("kwargs", {}))
+        if pending["method"] == "give":
+            await announce_gift(bot, interaction, result)
+            return
         if "instance" in result:
             instance = result["instance"]
             embed = card_panel(instance["card"], instance)
             file = await bot.card_image(instance["card"], instance)
             if file is not None:
-                embed.set_image(url="attachment://card.png")
+                embed.set_image(url=f"attachment://{file.filename}")
             await reply(interaction, embed=embed, file=file)
         else:
             await reply(interaction, content=f"Recycled {len(result['consumed'])} duplicate copies for **{result['credits_earned']} credits**. "
@@ -509,8 +561,8 @@ async def handle_component(bot, interaction, action, entity):
         if user not in (trade["a"], trade["b"]):
             raise ValueError("This table belongs to its two named collectors.")
         if action == "offer":
-            rows = await bot.call("inventory", str(interaction.guild_id), user, limit=25)
-            await reply(interaction, content="Select from your 25 most recent copies. For other copies, use the copy-ID button. Selecting an empty offer clears it.",
+            rows = await bot.call("inventory", str(interaction.guild_id), user, limit=40)
+            await reply(interaction, content="Pick from your most recent copies (or use `/vault trade member:… offer:…` to search by name). Selecting nothing clears your side.",
                         view=offer_picker(trade, rows, user))
             return
         if action == "offerpick":
@@ -524,6 +576,22 @@ async def handle_component(bot, interaction, action, entity):
             trade = await bot.call("trade_accept", entity, user, int(revision))
         await reply(interaction, embed=trade_panel(trade), view=trade_view(trade))
         await refresh_trade(bot, trade)
+        return
+    if action in ("wageraccept", "wagerdecline"):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        wager = await bot.call("get_wager", entity)
+        bot.verify_guild(wager, interaction)
+        wager = await bot.call("wager_respond", entity, user, action == "wageraccept")
+        try:
+            await discord_request(interaction.message.edit(embed=wager_panel(wager), view=wager_view(wager),
+                                                           allowed_mentions=discord.AllowedMentions.none()))
+        except (DISCORD_ERRORS + (AttributeError,)) as error:
+            log.warning("Wager display skipped: %s", type(error).__name__)
+        if wager["status"] == "settled":
+            outcome = "You won" if wager["winner"] == user else "You lost"
+            await reply(interaction, content=f"{outcome}. {wager['stake']:,} credits each; the winner took {wager['result']['prize']:,}.")
+        else:
+            await reply(interaction, content="Wager cancelled. No credits moved.")
         return
     if action in ("acceptduel", "cancelduel"):
         await discord_request(interaction.response.defer(ephemeral=True))
@@ -545,6 +613,39 @@ async def handle_component(bot, interaction, action, entity):
         await refresh_raid(bot, raid)
         return
     raise ValueError("This control is no longer available. Reopen its /vault command.")
+
+
+async def starter_notice(bot, interaction):
+    """Grant the one-time starter pack if eligible; returns text to show, or ''."""
+    if getattr(interaction, "guild_id", None) != bot.settings.guild_id:
+        return ""
+    try:
+        pack = await bot.call("starter_pack", str(interaction.guild_id), str(interaction.user.id))
+    except (GameError, sqlite3.OperationalError) as error:
+        log.warning("Starter pack skipped: %s", type(error).__name__)
+        return ""
+    if not pack:
+        return ""
+    names = ", ".join(f"**{item['name']}**" for item in pack["instances"])
+    return (f"🎁 Welcome to KyberDex! Your starter pack: {names} and **{pack['credits']} credits**. "
+            "They're in `/vault collection`, and together they make a full Ground deck (`/vault deck`).")
+
+
+async def announce_gift(bot, interaction, result):
+    from .bot import reply
+    names = ", ".join(f"**{card['name']}**" for card in result["cards"])
+    if result.get("replayed"):
+        await reply(interaction, content=f"That gift already went through: {names}.")
+        return
+    text = f"<@{result['from_id']}> gave <@{result['to_id']}> {names}."
+    if result.get("note"):
+        text += f"\n> {discord.utils.escape_mentions(result['note'])}"
+    try:
+        await discord_request(interaction.channel.send(content=text, allowed_mentions=discord.AllowedMentions(
+            users=[discord.Object(int(result["to_id"]))], everyone=False, roles=False)))
+    except DISCORD_ERRORS as error:
+        log.warning("Gift announcement skipped: %s", type(error).__name__)
+    await reply(interaction, content=f"Sent {names} to <@{result['to_id']}>.")
 
 
 async def review_consumption(bot, interaction, method, instance_ids, target=None):
@@ -669,19 +770,23 @@ def add_feature_commands(group, bot):
     @app_commands.command(name="profile", description="See your collection progress, balance and battle record")
     async def profile(interaction: discord.Interaction):
         await discord_request(interaction.response.defer(ephemeral=True))
+        notice = await starter_notice(bot, interaction)
         row = await bot.call("profile", str(interaction.guild_id), str(interaction.user.id))
         embed = panel("Your collection progress", f"Level **{row['level']}** · **{row['xp']} XP**\n"
                       f"**{row['regular_collected_subject_count']} / {row['regular_subject_count']}** regular subjects · {row['regular_subject_completion_percent']}% complete\n"
                       f"**{row['unique_cards']} / {row['catalog_count']}** regular card treatments · **{row['event_unique_cards']} / {row['event_catalog_count']}** event cards\n"
                       f"**{row['total_cards']}** owned copies · **{row['credits']} credits**\n"
                       f"Duel record: {row['wins']} wins / {row['losses']} losses")
+        if notice:
+            embed.description = notice + "\n\n" + embed.description
         await reply(interaction, embed=embed)
 
     @app_commands.command(name="daily", description="Collect free daily credits; no voting or paid rolls")
     async def daily(interaction: discord.Interaction):
         await discord_request(interaction.response.defer(ephemeral=True))
+        notice = await starter_notice(bot, interaction)
         row = await bot.call("daily", str(interaction.guild_id), str(interaction.user.id))
-        await reply(interaction, embed=panel("Daily supply delivered", f"**+{row['credits_earned']} credits**\n"
+        await reply(interaction, embed=panel("Daily supply delivered", (notice + "\n\n" if notice else "") + f"**+{row['credits_earned']} credits**\n"
                     f"Balance: {row['credits']} · Streak: {row['streak']} days\nNext supply <t:{int(row['next_reset'])}:R>."))
 
     @app_commands.command(name="recipes", description="Read exact crafting costs and duplicate recycle values")
@@ -711,28 +816,72 @@ def add_feature_commands(group, bot):
         else:
             await select_craft_ingredients(bot, interaction, target_card)
 
-    @app_commands.command(name="trade", description="Open a reviewed trade table, or inspect an existing trade")
-    @app_commands.autocomplete(trade_id=trade_autocomplete)
-    async def trade(interaction: discord.Interaction, member: discord.Member | None = None, trade_id: str = ""):
+    @app_commands.command(name="trade", description="Swap cards with another collector; either side may offer nothing")
+    @app_commands.autocomplete(trade_id=trade_autocomplete, offer=copy_autocomplete)
+    @app_commands.describe(member="Who you want to trade with", offer="Optional: copies you'll put on the table right away",
+                           trade_id="Reopen one of your open trades")
+    async def trade(interaction: discord.Interaction, member: discord.Member | None = None, offer: str = "", trade_id: str = ""):
         await discord_request(interaction.response.defer(ephemeral=True))
+        guild, user = str(interaction.guild_id), str(interaction.user.id)
         if trade_id:
             record = await bot.call("get_trade", trade_id)
             bot.verify_guild(record, interaction)
-            if str(interaction.user.id) not in (record["a"],record["b"]):
-                raise ValueError("Only the named collectors can inspect this trade table.")
+            if user not in (record["a"],record["b"]):
+                raise ValueError("Only the named collectors on this trade can open it.")
             await reply(interaction, embed=trade_panel(record), view=trade_view(record))
-        elif member and not member.bot:
-            record = await bot.call("trade_create", str(interaction.guild_id), str(interaction.user.id), str(member.id))
-            message = await discord_request(interaction.channel.send(embed=trade_panel(record), view=trade_view(record),
-                                          nonce="vv-trade:"+record["id"], allowed_mentions=discord.AllowedMentions.none()))
-            await bot.runtime_call("bind", "trade", record["id"], interaction.channel_id, message.id)
-            await reply(interaction, content=f"Your trade table is ready: {message.jump_url}\nUse `/vault trade trade_id:{record['id']}` to refresh it.")
-        else:
-            records = await bot.call("active_trades", str(interaction.guild_id), str(interaction.user.id))
-            if records:
-                await reply(interaction, embed=trade_panel(records[0]), view=trade_view(records[0]))
-            else:
-                await reply(interaction, content="You have no open trade. Choose another collector to create one, or provide a saved trade ID to inspect its receipt.")
+            return
+        if member is None:
+            records = await bot.call("active_trades", guild, user)
+            if not records:
+                await reply(interaction, content="You have no open trades. Use `/vault trade member:@someone` to start one — you can offer cards, ask for cards, or both.")
+                return
+            for record in records[:3]:
+                await reply(interaction, embed=trade_panel(record), view=trade_view(record))
+            return
+        if member.bot:
+            raise ValueError("Choose a person, not a bot.")
+        copies = ids_from_text(offer, TRADE_MAX_PER_SIDE) if offer.strip() else []
+        record = await bot.call("trade_create", guild, user, str(member.id))
+        if copies:
+            record = await bot.call("trade_offer", record["id"], user, copies)
+        if record.get("reopened") and await bot.runtime_call("binding", "trade", record["id"]):
+            await refresh_trade(bot, record)
+            await reply(interaction, content="You already had a trade open with them — here it is.", embed=trade_panel(record), view=trade_view(record))
+            return
+        message = await discord_request(interaction.channel.send(
+            content=f"{member.mention}, <@{user}> opened a trade with you.", embed=trade_panel(record), view=trade_view(record),
+            nonce="vv-trade:"+record["id"], allowed_mentions=discord.AllowedMentions(users=[member], everyone=False, roles=False)))
+        await bot.runtime_call("bind", "trade", record["id"], interaction.channel_id, message.id)
+        await reply(interaction, content=f"Trade table posted and {member.display_name} was pinged: {message.jump_url}")
+
+    @app_commands.command(name="give", description="Give one or more of your cards to another collector")
+    @app_commands.autocomplete(copies=copy_autocomplete)
+    @app_commands.describe(member="Who receives the cards", copies="Pick up to five copies here (search by name)",
+                           note="Optional message shown with the gift")
+    async def give(interaction: discord.Interaction, member: discord.Member, copies: str,
+                   note: app_commands.Range[str, 0, 200] = ""):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        if member.bot:
+            raise ValueError("Choose a person, not a bot.")
+        if member.id == interaction.user.id:
+            raise ValueError("You can't give cards to yourself.")
+        ids = ids_from_text(copies, GIFT_MAX)
+        if not ids:
+            raise ValueError("Pick at least one copy.")
+        guild, user = str(interaction.guild_id), str(interaction.user.id)
+        rows = [await bot.call("info", guild, user, key) for key in ids]
+        lines = "\n".join(f"**{row['name']}** · {row['card']['rarity'].title()} · {row['attack']} ATK / {row['health']} HP"
+                          + (" · ★ favorite" if row["favorite"] else "") for row in rows)
+        key = secrets.token_hex(12)
+        bot.pending_confirmations = {k: v for k, v in bot.pending_confirmations.items() if v["expires"] > time.time()}
+        bot.pending_confirmations[key] = {"guild": guild, "user": user, "method": "give",
+                                          "args": [guild, user, str(member.id), ids],
+                                          "kwargs": {"note": note or None, "request_id": key},
+                                          "kind": "confirmation", "expires": time.time()+120}
+        view = action_view([(f"Give to {member.display_name}"[:80], "confirm", key, discord.ButtonStyle.success),
+                            ("Keep my cards", "discard", key, discord.ButtonStyle.secondary)])
+        await reply(interaction, embed=panel("Review your gift", f"{lines}\n\nThese copies will move to {member.mention} "
+                    "immediately and leave any saved deck. Gifts can't be undone."), view=view)
 
     @app_commands.command(name="deck", description="View your saved squads or set up to three cards for Ground or Fleet")
     @app_commands.autocomplete(instance_ids=deck_autocomplete)
@@ -805,7 +954,58 @@ def add_feature_commands(group, bot):
         else:
             await reply(interaction, embed=raid_panel(rows[0]), view=raid_view(rows[0]))
 
-    for command in (profile,daily,recipes,salvage,craft,trade,deck,duel,raid,market):
+    gamble = app_commands.Group(name="gamble", description="Bet credits on coin flips, slots or a wager with a friend")
+
+    @gamble.command(name="coinflip", description=f"Call it: win double your bet ({GAMBLE_MIN}–{GAMBLE_MAX:,} credits)")
+    @app_commands.choices(side=[app_commands.Choice(name="Heads", value="heads"), app_commands.Choice(name="Tails", value="tails")])
+    async def coinflip(interaction: discord.Interaction, amount: app_commands.Range[int, GAMBLE_MIN, GAMBLE_MAX], side: str):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        result = await bot.call("coinflip", str(interaction.guild_id), str(interaction.user.id), amount, side,
+                                request_id=str(interaction.id))
+        head = f"🪙 It landed **{result['landed']}**. " + (f"You win **{result['payout']:,} credits**!" if result["won"]
+                                                          else f"You lost {amount:,} credits.")
+        embed = panel("Coin flip", head + f"\nBalance: **{result['credits']:,}** · Bet today: {result['wagered_today']:,}/{result['daily_cap']:,}")
+        embed.set_footer(text=GAMBLE_FOOTER)
+        await reply(interaction, embed=embed)
+
+    @gamble.command(name="slots", description=f"Spin the Kessel Run slots ({GAMBLE_MIN}–{GAMBLE_MAX:,} credits)")
+    async def slots(interaction: discord.Interaction, amount: app_commands.Range[int, GAMBLE_MIN, GAMBLE_MAX]):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        result = await bot.call("slots", str(interaction.guild_id), str(interaction.user.id), amount, request_id=str(interaction.id))
+        reels = " ".join(SLOT_ICONS.get(name, "❔") for name in result["reels"])
+        line = (f"**{result['multiplier']:g}× — {result['payout']:,} credits**" if result["payout"] else "No match this time.")
+        table = " · ".join(f"{SLOT_ICONS[name]}×3 = {pay}×" for name, _, pay in SLOT_SYMBOLS)
+        embed = panel("Kessel Run slots", f"# {reels}\n{line}\nBalance: **{result['credits']:,}** · Bet today: "
+                      f"{result['wagered_today']:,}/{result['daily_cap']:,}\n-# {table} · any pair 1.2× · 💎 pair 5×")
+        embed.set_footer(text=GAMBLE_FOOTER)
+        await reply(interaction, embed=embed)
+        if result.get("jackpot") and not result.get("replayed"):
+            await announce_big_win(bot, interaction, f"🎰 {interaction.user.mention} hit **{reels}** on the Kessel Run slots "
+                                   f"and won **{result['payout']:,} credits**!")
+
+    @gamble.command(name="wager", description="Challenge someone to a coin toss for credits; winner takes the pot")
+    async def wager(interaction: discord.Interaction, member: discord.Member, amount: app_commands.Range[int, GAMBLE_MIN, GAMBLE_MAX]):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        if member.bot or member.id == interaction.user.id:
+            raise ValueError("Choose another person, not yourself or a bot.")
+        record = await bot.call("wager_create", str(interaction.guild_id), str(interaction.user.id), str(member.id), amount)
+        message = await discord_request(interaction.channel.send(
+            content=f"{member.mention}, you've been challenged!", embed=wager_panel(record), view=wager_view(record),
+            allowed_mentions=discord.AllowedMentions(users=[member], everyone=False, roles=False)))
+        await reply(interaction, content=f"Challenge posted: {message.jump_url}")
+
+    @gamble.command(name="stats", description="Your betting record and today's remaining limit")
+    async def gamble_stats(interaction: discord.Interaction):
+        await discord_request(interaction.response.defer(ephemeral=True))
+        row = await bot.call("gamble_stats", str(interaction.guild_id), str(interaction.user.id))
+        embed = panel("Your betting record", f"**{row['bets']}** bets · {row['wagered']:,} wagered · {row['won']:,} paid out\n"
+                      f"Net: **{row['net']:+,} credits** · Biggest payout: {row['biggest_payout']:,}\n"
+                      f"Wagers: {row['wager_wins']} won of {row['wagers']}\n"
+                      f"Bet today: {row['wagered_today']:,}/{row['daily_cap']:,} · Balance: **{row['credits']:,}**")
+        embed.set_footer(text=GAMBLE_FOOTER)
+        await reply(interaction, embed=embed)
+
+    for command in (profile,daily,recipes,salvage,craft,trade,give,deck,duel,raid,market,gamble):
         group.add_command(command)
 
 

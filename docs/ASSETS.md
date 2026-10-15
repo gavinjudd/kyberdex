@@ -7,7 +7,7 @@ uv run venator-vault setup-art
 uv run venator-vault check --require-art
 ```
 
-The catalog has 851 card definitions backed by 847 distinct PNG files, including seasonal treatments. Installing seasonal artwork does not enable those releases. You do not need to locate or manually configure each image. The installer fetches the recorded official source images, applies the recorded crop, sizing and brightness transforms, and compares the result with expected reviewed pixel hashes before installing it.
+The catalog has 871 card definitions backed by 847 distinct PNG files, including seasonal treatments. Installing seasonal artwork does not enable those releases. You do not need to locate or manually configure each image. The installer fetches the recorded official source images, applies the recorded crop, sizing and brightness transforms, and compares the result with expected reviewed pixel hashes before installing it.
 
 Setup reads the tracked source recipes in [`data/art-sources.json`](../data/art-sources.json). It verifies the downloaded file's SHA-256 and the transformed image's reviewed RGB pixel hash, then writes the local PNG and its actual file hash into the runtime manifest. Pixel verification allows the installer to reproduce the reviewed image without requiring identical PNG compression bytes.
 

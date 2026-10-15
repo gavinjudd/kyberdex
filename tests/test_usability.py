@@ -154,7 +154,7 @@ async def test_command_choices_alias_search_and_empty_raid_have_navigation(bot):
     seed_card(bot,101)
     group=bot.tree.get_command('vault')
     expected={'help','catalog','card','collection','complain','favorite','wishlist','status',
-              'profile','daily','recipes','salvage','craft','trade','deck','duel','raid','market'}
+              'profile','daily','recipes','salvage','craft','trade','give','gamble','deck','duel','raid','market'}
     assert {cmd.name for cmd in group.commands}==expected
     for cmd,param in [('catalog','rarity'),('collection','rarity'),('deck','arena'),('duel','arena')]:
         assert group.get_command(cmd).get_parameter(param).choices

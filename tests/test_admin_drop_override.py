@@ -48,8 +48,9 @@ def override(game, card_id, **kwargs):
 def test_uniform_draw_includes_every_current_catalog_definition_equally(tmp_path):
     game = core.Game(tmp_path / "all-cards.sqlite3", Path(__file__).parents[1] / "data/cards.json")
     rows = game.spawn_pool(now=NOW, override_until=NOW+3600, uniform=True)
-    assert len(rows) == len(game.catalog) == 851
-    assert {row["id"] for row in rows} == game.catalog.keys()
+    assert len(rows) == 851 and len(game.catalog) == 871  # 20 staff-only Celestial cards never drop
+    droppable = {key for key, card in game.catalog.items() if card["category"] != "staff"}
+    assert {row["id"] for row in rows} == droppable
     assert all(row["probability"] == pytest.approx(1/851) for row in rows)
     assert sum(row["probability"] for row in rows) == pytest.approx(1)
 
@@ -58,7 +59,7 @@ def test_uniform_draw_includes_every_current_catalog_definition_equally(tmp_path
     class ChooseLimited:
         def choices(self, population, weights, k):
             assert k == 1 and weights == pytest.approx([1/851]*851)
-            assert {card["id"] for card in population} == game.catalog.keys()
+            assert {card["id"] for card in population} == droppable
             return [next(card for card in population if card["id"] == limited_id)]
 
     game.rng = ChooseLimited()
@@ -323,7 +324,7 @@ def test_schema_six_migration_preserves_ordinary_saved_drops_and_reservations(ca
     assert saved["override_until"] is None and saved["request_id"] is None and saved["uniform"] == 0
     assert saved["expires_at"] == old["expires_at"] and len(saved["claims"]) == 1
     assert stock(restarted, "common") == (1, 1)
-    assert restarted.health()["schema_version"] == 7
+    assert restarted.health()["schema_version"] == 8
 
 
 def test_paused_manual_encounter_is_not_a_recovery_anchor_for_normal_spawn_schedule(case):

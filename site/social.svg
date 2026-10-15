@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
-<title id="title">KyberDex — Open-source Discord card collection bot</title><desc id="desc">Collect, trade, craft and battle. Python, SQLite, 851 card definitions.</desc>
+<title id="title">KyberDex — Open-source Discord card collection bot</title><desc id="desc">Collect, trade, craft and battle. Python, SQLite, 871 card definitions.</desc>
 <rect width="1200" height="630" fill="#101518"/><path d="M60 98H1140M60 522H1140" stroke="#303c42"/>
 <g fill="none" stroke="#dcc291" stroke-width="2"><path d="M78 34 95 44v20L78 74 61 64V44Z"/><path d="M71 44v20m14-20L71 58m6-5 8 11"/></g>
 <text x="113" y="64" fill="#dcc291" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="3">KYBERDEX</text><text x="1140" y="60" fill="#abb5b8" font-family="monospace" font-size="15" text-anchor="end">OPEN SOURCE / DISCORD</text>
 <text x="60" y="219" fill="#f1f0eb" font-family="Arial,sans-serif" font-size="64" font-weight="600" letter-spacing="-2">A collection game.</text><text x="60" y="295" fill="#dcc291" font-family="Arial,sans-serif" font-size="64" font-weight="600" letter-spacing="-2">Yours to build on.</text>
 <text x="60" y="361" fill="#abb5b8" font-family="Arial,sans-serif" font-size="24">Collect. Trade. Craft. Battle.</text>
 <text x="60" y="459" fill="#abb5b8" font-family="monospace" font-size="17">PYTHON 3.13+    SQLITE    SELF-HOSTED</text>
-<path d="M875 156V460" stroke="#303c42"/><text x="919" y="277" fill="#f1f0eb" font-family="Arial,sans-serif" font-size="86" letter-spacing="-3">851</text><text x="921" y="312" fill="#abb5b8" font-family="Arial,sans-serif" font-size="18">card definitions</text>
+<path d="M875 156V460" stroke="#303c42"/><text x="919" y="277" fill="#f1f0eb" font-family="Arial,sans-serif" font-size="86" letter-spacing="-3">871</text><text x="921" y="312" fill="#abb5b8" font-family="Arial,sans-serif" font-size="18">card definitions</text>
 <g stroke-width="4"><path d="M923 355h165" stroke="#a9b4ba"/><path d="M923 374h100" stroke="#89c4a1"/><path d="M923 393h73" stroke="#85b6d0"/><path d="M923 412h43" stroke="#ad9bc9"/><path d="M923 431h22" stroke="#dcc291"/><path d="M923 450h9" stroke="#d28d96"/></g>
 <text x="60" y="574" fill="#f1f0eb" font-family="Arial,sans-serif" font-size="20">github.com/gavinjudd/kyberdex</text><text x="1140" y="574" fill="#819095" font-family="monospace" font-size="14" text-anchor="end">MIT SOFTWARE</text>
 </svg>

@@ -34051,10 +34051,10 @@
       "height": 1536,
       "mode": "RGB",
       "source_page_url": "https://www.starwars.com/series/clone-wars/darkness-on-umbara-episode-gallery",
-      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-ctjcww_09fd33e9.jpeg",
-      "source_raw_sha256": "836f7cfd8e7d3873dae7cc12ccb4111acd34ae5fd8e9242e9239ed4d637b24cc",
-      "pixel_sha256": "f7dd741e7c8e61fe7003aa4d06837ae50b88bd82bd7be0ef627777e61a3c252b",
-      "reviewed_sha256": "f7c4a730b31a5d5c7c642a05b5cef9ab01fdcca6de79b684d5ecb7649bcd4f0e",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-3rh4t2_2d5f7b7d.jpeg",
+      "source_raw_sha256": "ab108265a95be5881a59ff157103cceb08189afc76a833bd26d07adb4cacafd8",
+      "pixel_sha256": "c95a7860101b4b9cfe07d9de18df47399368f42b0a30b45e833cbb659af38b66",
+      "reviewed_sha256": "b348ba329ec5c9f1a39030926f1060a2748b2309688bd64d79d08e1114da576a",
       "normalization": {
         "crop_center": [
           0.5,
@@ -34072,7 +34072,7 @@
           ],
           "size": [
             1024,
-            810
+            717
           ],
           "matte_rgb": [
             4,
@@ -34081,9 +34081,9 @@
           ]
         },
         "requested_crop_box": [
-          260,
+          150,
           87,
-          950,
+          930,
           633
         ]
       },
@@ -35358,6 +35358,804 @@
         "placement_xy": [
           64,
           366
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "darth-vader-the-hallway": {
+      "path": "assets/art/darth-vader.png",
+      "subject_id": "anakin-skywalker",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/darth-vader",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/maul-shadow-lord-season-1-finale-darth-vader_9d1e251b.jpeg?region=238%2C0%2C1444%2C812",
+      "source_raw_sha256": "5f64d08976922909c8bbbf95fab69923e544ab5650cdef32843144fb19739e9b",
+      "pixel_sha256": "a383523565947aede0d1459ad7ac8a57d3124c5b430c96c728204e715108662a",
+      "reviewed_sha256": "a37a62228a877e57f581f8c87170b8b921efbf8ec28086dcaef7d9e68afea507",
+      "normalization": {
+        "crop_center": [
+          0.52,
+          0.5
+        ],
+        "fit_mode": "cover",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": null,
+        "requested_crop_box": [
+          0,
+          0,
+          1444,
+          812
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "yoda-grand-master": {
+      "path": "assets/art/yoda.png",
+      "subject_id": "yoda",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/series/clone-wars/ambush-episode-gallery",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-gw41q9_f10603a4.jpeg",
+      "source_raw_sha256": "10ff90e239e0fbbc555ad7199c214b56ce897c82f221691d3d8fb28d993e8598",
+      "pixel_sha256": "c4b2a035279494916871fb211bb9eef3ca7f1c35197062eea9a10501e299b86e",
+      "reviewed_sha256": "20b47c74ec2b2ad9c03e7f4b425e8509dc9f01f887b52661a75f1d1ad4647b5b",
+      "normalization": {
+        "crop_center": [
+          0.5,
+          0.5
+        ],
+        "fit_mode": "contain",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": {
+          "xy": [
+            0,
+            40
+          ],
+          "size": [
+            1024,
+            687
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          230,
+          45,
+          1110,
+          635
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "luke-skywalker-jedi-master": {
+      "path": "assets/art/luke-skywalker.png",
+      "subject_id": "luke-skywalker",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/luke-skywalker",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/luke-skywalker-main_7ffe21c7.jpeg?region=130%2C147%2C1417%2C796",
+      "source_raw_sha256": "fda1968d78e3bd4803e896c39e2f5e1501d62bbaf2156ce39983d6d44b8e0f32",
+      "pixel_sha256": "d2dc8d31cb628a4e087fc4e113e00d817d783a310258a06d5f8abef3e4fdff69",
+      "reviewed_sha256": "d68e47e560f69da43c31fde75b28d199b5ec0dc52668e29d9de1ff7ec008cb9b",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1417,
+          796
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          503
+        ],
+        "placement_xy": [
+          64,
+          366
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "emperor-palpatine-throne-room": {
+      "path": "assets/art/darth-sidious.png",
+      "subject_id": "darth-sidious",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/darth-sidious",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/emperor-palpatine_9a0e992d.jpeg?region=0%2C25%2C1280%2C718",
+      "source_raw_sha256": "4f954c93a2d7b195e7751cfcbcd5f1c2d472694b265eadd0c0ddb0f691f5b0db",
+      "pixel_sha256": "4908bf241313f98bb8444a8e118b66568ea25b8d874c004b4d92d3a196e03d71",
+      "reviewed_sha256": "eb40b07d2f13662e7bb7dd3484f078402ced8e950f1ff25235a7fc4dd5e58d9b",
+      "normalization": {
+        "crop_center": [
+          0.53,
+          0.5
+        ],
+        "fit_mode": "cover",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": null,
+        "requested_crop_box": [
+          0,
+          0,
+          1280,
+          718
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "anakin-skywalker-the-chosen-one": {
+      "path": "assets/art/anakin-skywalker.png",
+      "subject_id": "anakin-skywalker",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/anakin-skywalker",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/anakin-skywalker-main_0326586e.png",
+      "source_raw_sha256": "6290d6755c18de151a8d65b45af6efea6d4557b520955e0c55b622f41ab87662",
+      "pixel_sha256": "154355bf9e1f51c165cd4f6142d9a3da35db7f3101090b6cd825dcee8343342f",
+      "reviewed_sha256": "ea4d4201a4f5ceea3d60b585be5169d68385c1d99d38372e3075c7e55eb388ed",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1280,
+          536
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          375
+        ],
+        "placement_xy": [
+          64,
+          430
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "obi-wan-kenobi-the-negotiator": {
+      "path": "assets/art/obi-wan-kenobi.png",
+      "subject_id": "obi-wan-kenobi",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/obi-wan-kenobi",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-ltlvt6_8ab74885.jpeg?region=0%2C0%2C1200%2C675",
+      "source_raw_sha256": "e655c74b7038d53a53aca292dba4e3284e595e135fca782f380b995fa8b83dfb",
+      "pixel_sha256": "62c3bcdc5a39531eedc660826c8b106ebd619a890d7d20e3758d6d1524d5a742",
+      "reviewed_sha256": "d82d6242d20e6b02ae43b8130b9b6b99de894ef3d25111904ae3f852e938bdb6",
+      "normalization": {
+        "crop_box": [
+          700,
+          60,
+          1190,
+          675
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          465,
+          584
+        ],
+        "placement_xy": [
+          279,
+          326
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "ahsoka-tano-the-white": {
+      "path": "assets/art/ahsoka-tano.png",
+      "subject_id": "ahsoka-tano",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/ahsoka-tano",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/gone-with-a-trace-episode-gallery-03_55423e52.jpeg?region=0%2C0%2C1280%2C544",
+      "source_raw_sha256": "c9166f3ca02e697a9deaefa933424054b32ad2e1a80ac736b5355bc6c6f5377d",
+      "pixel_sha256": "4d4e52657e40567117d7b7d0f9dca0bf642c614fdd7f17edfdffc5d81b825f6c",
+      "reviewed_sha256": "392524c61c170734f086f4e7613464b3d02c1bf11a88c9157f76c9b26e542351",
+      "normalization": {
+        "crop_center": [
+          0.5,
+          0.5
+        ],
+        "fit_mode": "contain",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": {
+          "xy": [
+            213,
+            100
+          ],
+          "size": [
+            597,
+            1180
+          ],
+          "matte_rgb": [
+            4,
+            12,
+            28
+          ]
+        },
+        "requested_crop_box": [
+          670,
+          0,
+          945,
+          544
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "mace-windu-vaapad-master": {
+      "path": "assets/art/mace-windu.png",
+      "subject_id": "mace-windu",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/mace-windu",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/Mace-Windu_b35242e5.jpeg?region=0%2C0%2C1637%2C921",
+      "source_raw_sha256": "16c1aadfe1246b3d67c0d6ffddc1d174ab6a2f8fc96db01a35148f0b30ee6ad0",
+      "pixel_sha256": "8b1a7cba2ffee700d400d9d06182958560282cd90cf984c831cf0f0d44168a87",
+      "reviewed_sha256": "602a947d5a0f4632030128055db25e7deb16ab69418131d1889c983cecb54dbc",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1637,
+          921
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          504
+        ],
+        "placement_xy": [
+          64,
+          366
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "grogu-force-foundling": {
+      "path": "assets/art/grogu.png",
+      "subject_id": "grogu",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/grogu",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/grogu-main_25a0f2fe.jpeg?region=0%2C23%2C1919%2C1080",
+      "source_raw_sha256": "2f4958107c4adce96393ace7626ca9b8b98e0ff1ac237e92c0ec1b428e430365",
+      "pixel_sha256": "71312a6b00824ad8ed1f4755809d2a3a8b74bacd938abf8ea31cf978964e3aba",
+      "reviewed_sha256": "fa52efe32f92a88a57e8f0606de2f18f9e9777e2d199c95a3a4af75df031c82d",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1919,
+          1080
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          504
+        ],
+        "placement_xy": [
+          64,
+          366
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "the-father-mortis-balance": {
+      "path": "assets/art/father.png",
+      "subject_id": "father",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/father",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_father_01_169_c0d0b780.jpeg?region=0%2C0%2C1560%2C878",
+      "source_raw_sha256": "7e3328ac883d8cdf6dc43f612228ee1e0220e00367ed6dcc8ccc446f7d2eb65c",
+      "pixel_sha256": "299c448b751e1c0b98ce96f8ef0bb9d9fc2f620ea138b26513aa3e065c59bfe8",
+      "reviewed_sha256": "dd32ca2591328f10bc157d8ddc9b5b404c1cf6298f946b2a17135ada336e4ac6",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1560,
+          878
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          504
+        ],
+        "placement_xy": [
+          64,
+          366
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "thrawn-grand-strategist": {
+      "path": "assets/art/grand-admiral-thrawn.png",
+      "subject_id": "grand-admiral-thrawn",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/grand-admiral-thrawn",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/grand-admiral-thrawn-databank-history-1_df8fbfb8.jpeg?region=0%2C0%2C1920%2C1080",
+      "source_raw_sha256": "397aa415c73aed0584112bd48e085db1d769d565a76e588056fea3c432ffc760",
+      "pixel_sha256": "cd763aca56d475ad43022b54a271bf2a1ffed00573295280029ad9985deb16b1",
+      "reviewed_sha256": "47364998a30bf054a99d151dadf061a3e894ccc01e90bcf252d9341923eb67d3",
+      "normalization": {
+        "crop_center": [
+          0.48,
+          0.5
+        ],
+        "fit_mode": "cover",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": null,
+        "requested_crop_box": [
+          0,
+          0,
+          1920,
+          1080
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "darth-maul-shadow-collective": {
+      "path": "assets/art/darth-maul.png",
+      "subject_id": "darth-maul",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/darth-maul-biography-gallery",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/open-uri20150608-27674-jmgdo7_c969c086.jpeg",
+      "source_raw_sha256": "79dd93bf3cfa1063cfe054fc08cc30fb4da78f3c31c5801bfec6537a7cba5e51",
+      "pixel_sha256": "c0561428d268d2153cc59c6f8ef34327fb5b5e54fe00706c80ee1c4c9daac48c",
+      "reviewed_sha256": "cfd553b418c53f2e788532bd9cf72bea0f6d32c2a9d2859bfb28777094ee2a5d",
+      "normalization": {
+        "crop_center": [
+          0.54,
+          0.5
+        ],
+        "fit_mode": "cover",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": null,
+        "requested_crop_box": [
+          0,
+          0,
+          1280,
+          853
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "boba-fett-daimyo": {
+      "path": "assets/art/boba-fett.png",
+      "subject_id": "boba-fett",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/boba-fett",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/boba-fett-main_a8fade4d.jpeg?region=203%2C34%2C1077%2C606",
+      "source_raw_sha256": "d0c923d2c7c51ebe2fa02ab04beff31747b8182e485dd0a78ceefaa94a8e83ce",
+      "pixel_sha256": "0b69df351ac428f6fbf5f2d32e124c3a34abd7866270e2388cd576a43300a0a9",
+      "reviewed_sha256": "4f02fd6c71fae77ef10e320a121e1f6d5e848bc5a27b822463d556c57f3705e0",
+      "normalization": {
+        "crop_center": [
+          0.5,
+          0.5
+        ],
+        "fit_mode": "cover",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": null,
+        "requested_crop_box": [
+          0,
+          0,
+          1077,
+          606
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "din-djarin-darksaber": {
+      "path": "assets/art/din-djarin.png",
+      "subject_id": "din-djarin",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/the-mandalorian",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/din-djarin-the-mandalorian-main_66f8a62f.jpeg?region=98%2C0%2C1821%2C1023",
+      "source_raw_sha256": "c3abc744924b482a8f5e558aa6746af9d07d730128fcd2bf1082be65563ffb3b",
+      "pixel_sha256": "119b6c7a1aa953cc02ba2bd433f8224cbcd97e6f2b9dd30f5e6cd9505e8da36b",
+      "reviewed_sha256": "2e20e25676c4fe9255bb13e2ce31714f4b229cc5358700891df569cf78fd43c2",
+      "normalization": {
+        "crop_center": [
+          0.54796,
+          0.5
+        ],
+        "fit_mode": "cover",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": null,
+        "requested_crop_box": [
+          0,
+          0,
+          1821,
+          1023
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "rey-skywalker-exegol": {
+      "path": "assets/art/rey.png",
+      "subject_id": "rey",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/rey",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/rey-training_1be2486c.jpeg?region=0%2C0%2C1280%2C536",
+      "source_raw_sha256": "2cda3add7bfeb147c4259fa58de5e74d3bafa2dfc058547ebb94db74ea25b6fc",
+      "pixel_sha256": "ac16b94a9a4b4d0fb2a4240b585834ba8e144d8774130d99a6e19af9feb1ff65",
+      "reviewed_sha256": "9644662ced208b45cf9134fe939d1ee3c7703d7c83977cfd817233dd9afc52e2",
+      "normalization": {
+        "crop_center": [
+          0.5,
+          0.5
+        ],
+        "fit_mode": "cover",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": null,
+        "requested_crop_box": [
+          461,
+          27,
+          755,
+          525
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "revan-the-prodigal-knight": {
+      "path": "assets/art/darth-revan.png",
+      "subject_id": "darth-revan",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://forums.ea.com/discussions/swgoh-strategy-and-tips-en/kit-reveal-darth-revan/3872759",
+      "source_image_url": "https://forums.ea.com/t5/s/tghpe58374/images/bS0zODcyNzU5LTc0NTI1aTgwRjI3MjM5QjEwREIwRTc?revision=1",
+      "source_raw_sha256": "fc9f1cd58aca1dd2a3fbbe53158fc3f48776b64faf5d55b0c89a59dcc4baf7c2",
+      "pixel_sha256": "8f7eda586b1c0323037fb5a880e13f92b355af06dbb12dd425cdebc3c08599aa",
+      "reviewed_sha256": "376ece4c195ee7f442a45abf0e6ea426ae8396a7a5d043e81b1e348574016640",
+      "normalization": {
+        "crop_center": [
+          0.5,
+          0.5
+        ],
+        "fit_mode": "cover",
+        "output_size": [
+          1024,
+          1536
+        ],
+        "placement": null,
+        "requested_crop_box": [
+          100,
+          0,
+          655,
+          720
+        ]
+      },
+      "recipe": "official-source-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "death-star-superlaser-primed": {
+      "path": "assets/art/death-star.png",
+      "subject_id": "death-star",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/death-star",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/Death-Star-I-copy_36ad2500.jpeg?region=0%2C0%2C1600%2C900",
+      "source_raw_sha256": "95d8fda7d7f2d9d905d6eb3752705afa69d2d73caf1507c2e90485c562e03720",
+      "pixel_sha256": "8ed9bc810cf4c76e38c4fd40c9eb0560ec78460192a51515864033b85f601bec",
+      "reviewed_sha256": "3a9e645f79ff43d2f2b1ef4bea93cdb89762d2e018e3fb11447353a44ca18839",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1600,
+          900
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          504
+        ],
+        "placement_xy": [
+          64,
+          366
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "executor-vaders-flagship": {
+      "path": "assets/art/executor.png",
+      "subject_id": "executor",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/executor",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/databank_executor_01_169_8157df82.jpeg?region=57%2C0%2C1503%2C845",
+      "source_raw_sha256": "2dd9860a9a928607036f8363cd4550bd23c5680b726ddf54aa7a2a86767b3520",
+      "pixel_sha256": "c0f3dbc79d88b01cf1d2d824db56dd67e4088f6a8ad64efbdbc491e7cd9ad765",
+      "reviewed_sha256": "847565275931cec213592ce1f8db3470143478a270176964f9060f80b6d426ed",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1503,
+          845
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          504
+        ],
+        "placement_xy": [
+          64,
+          366
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "supremacy-mega-flagship": {
+      "path": "assets/art/the-supremacy.png",
+      "subject_id": "the-supremacy",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/the-supremacy",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/ep8-ff-003419_7bd5f27c.jpeg?region=0%2C0%2C1280%2C720",
+      "source_raw_sha256": "e59cc081bbcef6a7cd3eb231f37ac2edc08c49dbd91658fcbf7934f82c6e2b00",
+      "pixel_sha256": "820ee2c9a2c9abea1c559b80fc012dcf10118f3aab17372f7792a862e9a3bd70",
+      "reviewed_sha256": "f3df1185144874e9b3ee60c78fced1bde604ed3fae4524dbd6fdebcad3f03175",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1280,
+          720
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          504
+        ],
+        "placement_xy": [
+          64,
+          366
+        ],
+        "canvas": [
+          1024,
+          1536
+        ],
+        "fit_mode": "contain",
+        "feather_px": 10
+      },
+      "recipe": "published-window-v1",
+      "status": "available",
+      "rights_status": "unverified"
+    },
+    "millennium-falcon-kessel-run": {
+      "path": "assets/art/millennium-falcon.png",
+      "subject_id": "millennium-falcon",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "source_page_url": "https://www.starwars.com/databank/millennium-falcon",
+      "source_image_url": "https://lumiere-a.akamaihd.net/v1/images/millennium-falcon-1-retina_00b73517.jpeg?region=0,0,1200,507",
+      "source_raw_sha256": "755c733737ac1958da195938535af94cc46e16b5cd5bd1b690a8a89580610f64",
+      "pixel_sha256": "bf292faede3812bfb99d058dddc53f059ba3c3dc31713f80ec83df156172cf95",
+      "reviewed_sha256": "7e4719f23d1f0a95a28d4215e11bf602d59e0051aa631aa602fecfa71b5f28be",
+      "normalization": {
+        "crop_box": [
+          0,
+          0,
+          1200,
+          507
+        ],
+        "brightness": 1.0,
+        "foreground_window": [
+          64,
+          326,
+          960,
+          910
+        ],
+        "placement_size": [
+          896,
+          379
+        ],
+        "placement_xy": [
+          64,
+          428
         ],
         "canvas": [
           1024,

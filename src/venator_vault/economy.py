@@ -71,14 +71,38 @@ def audit_economy(cards, *, tier_weights=None, limited_share_percent=LIMITED_SHA
             "ordinary_per_card_mint_rate_min": min(mint_rates) * lane_min,
             "ordinary_per_card_mint_rate_max": max(mint_rates),
         }
+    banded = bool(regular) and all(isinstance(c.get("notability"), int) and 1 <= c["notability"] <= 5 for c in regular)
+    rates = {}
+    for card in regular:
+        rarity = card["rarity"]
+        rates[card["id"]] = (tier_weights[rarity] / mass * card["weight"] / totals[rarity] * COLLECTOR_LIMITS[rarity])
     comparisons = []
     for lower, higher in pairwise(RARITIES):
         if lower not in tiers or higher not in tiers:
             continue
-        floor = tiers[lower]["ordinary_per_card_mint_rate_min"]
-        ceiling = tiers[higher]["ordinary_per_card_mint_rate_max"]
-        passed = floor+1e-12 >= ceiling
-        comparisons.append({"lower": lower, "higher": higher, "ratio": floor/ceiling, "passed": passed})
+        lane_min = 1-limited_share_percent/100 if lower in seasonal_tiers else 1
+        if banded:
+            # notability-v1: like-for-like scarcity. Within each notability band a
+            # higher tier is strictly rarer per card, in every seasonal lane state,
+            # and each tier's average card is rarer than the tier below.
+            ratios = []
+            for band in range(1, 6):
+                low = [rates[c["id"]] * lane_min for c in regular if c["rarity"] == lower and c["notability"] == band]
+                high = [rates[c["id"]] for c in regular if c["rarity"] == higher and c["notability"] == band]
+                if low and high:
+                    ratios.append(min(low) / max(high))
+            mean = lambda rarity: sum(rates[c["id"]] for c in regular if c["rarity"] == rarity) / counts[rarity]
+            ratio = min(ratios + [mean(lower) / mean(higher)])
+            strict = tiers[lower]["ordinary_per_card_mint_rate_min"] / tiers[higher]["ordinary_per_card_mint_rate_max"]
+            passed = ratio + 1e-12 >= 1
+            comparisons.append({"lower": lower, "higher": higher, "ratio": ratio, "passed": passed,
+                                "basis": "notability-band", "cross_band_ratio": strict})
+        else:
+            floor = tiers[lower]["ordinary_per_card_mint_rate_min"]
+            ceiling = tiers[higher]["ordinary_per_card_mint_rate_max"]
+            ratio = floor/ceiling
+            passed = floor+1e-12 >= ceiling
+            comparisons.append({"lower": lower, "higher": higher, "ratio": ratio, "passed": passed})
         if not passed:
             violations.append(f"ordinary_scarcity_inversion:{lower}:{higher}")
     return {
@@ -89,5 +113,6 @@ def audit_economy(cards, *, tier_weights=None, limited_share_percent=LIMITED_SHA
         "cadence": cadence,
         "cadence_basis": "randomized configured cycle requiring recent chat; bounded activity acceleration; saved legacy cycle may retain its existing deadline",
         "limited_share_percent": limited_share_percent,
+        "card_weight_basis": "notability-v1" if banded else "flat",
         "tiers": tiers, "adjacent_scarcity_checks": comparisons,
     }

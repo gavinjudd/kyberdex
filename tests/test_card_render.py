@@ -15,6 +15,14 @@ from venator_vault.card_render import FINISHES, CardRenderer, is_special_edition
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(autouse=True)
+def legacy_style(monkeypatch):
+    """These tests cover the Hyperspace Foil layout, kept as the rollback style."""
+    from venator_vault import card_render
+    monkeypatch.setattr(card_render, "CARD_STYLE", "hyperspace-foil")
+    monkeypatch.setattr(card_render, "VERSION", card_render.LEGACY_VERSION)
+
+
 @pytest.fixture
 def render_case(tmp_path):
     shutil.copytree(ROOT / "assets/fonts", tmp_path / "assets/fonts")

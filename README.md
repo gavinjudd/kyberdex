@@ -1,6 +1,6 @@
 # KyberDex — open-source Star Wars Discord card bot
 
-**Collect, trade, craft and battle Star Wars cards in your Discord server.** KyberDex is a self-hosted Python Discord bot with a transactional SQLite game engine, 851 card definitions, separate Ground and Fleet battles, cooperative raids and a searchable web catalog. Built for Venator Command; released for developers and community operators to inspect, learn from and adapt.
+**Collect, trade, craft and battle Star Wars cards in your Discord server.** KyberDex is a self-hosted Python Discord bot with a transactional SQLite game engine, 871 card definitions, separate Ground and Fleet battles, cooperative raids and a searchable web catalog. Built for Venator Command; released for developers and community operators to inspect, learn from and adapt.
 
 [Project website](https://gavinjudd.github.io/kyberdex/) · [Self-hosting guide](docs/SETUP.md) · [Gameplay & commands](docs/GAMEPLAY.md) · [Architecture](docs/ARCHITECTURE.md) · [Contribute](CONTRIBUTING.md)
 
@@ -40,7 +40,7 @@ This is a **single-guild deployment** running on your own computer or server. Ke
 | Reviewed trades & crafting | Two-sided escrow, revision-specific confirmations, exact consumption previews and protected favorites/loadouts. |
 | Ground & Fleet combat | Separate arenas, three-card squads, role abilities, faction bonuses and cooperative raid bosses. |
 | Transparent economy | Published rarity odds, free daily credits, daily market, crafting costs and bounded seasonal supply. No real-money purchases or paid rolls. |
-| Collectible presentation | Pillow card renderer with six rarity finishes, showcase layouts and limited-edition treatments. Install subject art locally with `setup-art`. |
+| Collectible presentation | Full-bleed Pillow card faces with a distinct material per rarity, from matte Common to animated holographic Mythic and Celestial GIFs. Install subject art locally with `setup-art`. |
 | Durable operations | SQLite WAL, atomic ownership changes, persisted schedules, startup checks and integrity-checked backup/restore tools. |
 | Public web catalog | Searchable card definitions and reviewed artwork, without player inventory or mutation endpoints. |
 
@@ -61,19 +61,20 @@ Prefer to clone the repository and configure it yourself? The [manual setup guid
 | `/vault favorite`, `/vault wishlist` | Protect a copy or track a card you want. |
 | `/vault profile`, `/vault daily`, `/vault market` | View progress, collect free credits and review the daily market. |
 | `/vault recipes`, `/vault craft`, `/vault salvage` | Inspect costs and confirm exactly which copies are consumed. |
-| `/vault trade` | Open a two-sided trade table with escrow and mutual confirmation. |
+| `/vault trade`, `/vault give` | Swap cards (one-sided offers fine; your partner is pinged) or gift them outright. |
+| `/vault gamble` | Coin flips, Kessel Run slots and member wagers, using credits only. |
 | `/vault deck`, `/vault duel` | Save Ground/Fleet squads and challenge another collector. |
 | `/vault raid` | Inspect a cooperative encounter, join a squad or attack. |
 | `/vault complain` | Send a private report to the server's bot managers. |
-| `/vault-admin setup`, `pause`, `spawn`, `event`, `raid`, `health`, `complaints` | Server management; requires **Manage Server**. |
+| `/vault-admin setup`, `pause`, `spawn`, `event`, `raid`, `health`, `complaints`, `failed-names`, `give`, `clear-inventory`, `gambling` | Server management; requires **Manage Server**. |
 
 Read [gameplay, odds and capture rules](docs/GAMEPLAY.md) for details. Administrative forced spawns and event starts are explicit exceptions to automatic activity scheduling.
 
 ## Catalog & game balance
 
-The included catalog contains **851 definitions: 835 regular treatments covering 818 distinct subjects, plus 16 seasonal editions**. Treatments of one subject do not inflate distinct-subject completion. Ground and Fleet remain separate arenas. Source and continuity labels distinguish canon, approved alternate/game continuity and event-only material; inclusion does not reclassify Star Wars continuity.
+The included catalog contains **871 definitions: 835 regular treatments covering 818 distinct subjects, 16 seasonal editions and 20 staff-only Celestial cards**. Treatments of one subject do not inflate distinct-subject completion. Ground and Fleet remain separate arenas. Source and continuity labels distinguish canon, approved alternate/game continuity and event-only material; inclusion does not reclassify Star Wars continuity.
 
-The default rarity weights are **54% Common, 22% Uncommon, 17.8% Rare, 4.2% Epic, 1.6% Legendary and 0.4% Mythic** when every tier has eligible cards. Empty tiers are excluded and weights renormalize. Activated limited editions receive a separate lane within a rarity, with release windows and lifetime caps. See [the catalog and balance guide](docs/CATALOG.md).
+The default rarity weights are **54% Common, 22% Uncommon, 17.8% Rare, 4.2% Epic, 1.6% Legendary and 0.4% Mythic** when every tier has eligible cards; within a tier, well-known subjects are weighted up. Celestial cards above Mythic never drop and are granted only by server staff. Empty tiers are excluded and weights renormalize. Activated limited editions receive a separate lane within a rarity, with release windows and lifetime caps. See [the catalog and balance guide](docs/CATALOG.md).
 
 ## Architecture
 

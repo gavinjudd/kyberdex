@@ -1,6 +1,6 @@
 # Card catalog, rarity odds and balance
 
-The public [`data/cards.json`](../data/cards.json) is the source of card definitions. It includes 851 definitions: 835 regular treatments covering 818 distinct non-event subjects, plus 16 seasonal editions. A treatment is a specific depiction or variant; a subject is the underlying collection identity. Several treatments of the same character or vehicle do not create extra distinct subjects.
+The public [`data/cards.json`](../data/cards.json) is the source of card definitions. It includes 871 definitions: 835 regular treatments covering 818 distinct non-event subjects, 16 seasonal editions and 20 staff-only Celestial cards. A treatment is a specific depiction or variant; a subject is the underlying collection identity. Several treatments of the same character or vehicle do not create extra distinct subjects.
 
 ## Continuity and provenance
 
@@ -20,12 +20,23 @@ The included catalog uses spawn schema 3, rate revision 3:
 | Epic | 4.2% | 2 |
 | Legendary | 1.6% | 1 |
 | Mythic | 0.4% | 1 |
+| Celestial | Never drops (staff-granted) | 1 |
 
 The engine chooses a rarity first, then a release lane, then a card using relative weights inside that lane. When both ordinary and activated limited cards are eligible in a tier, limited editions receive 25% of that tier's probability. If only one lane is eligible it receives the entire tier. Empty tiers are removed and the remaining probabilities renormalize.
 
 Adding card definitions does not increase their rarity tier's aggregate probability. Actual draw eligibility also depends on release windows, enabled events, remaining supply and active reservations. The public catalog is not a view of live reserved stock. Administrator equal-chance events use their explicitly different selection rule.
 
 The engine preserves historical rate revisions for compatible older catalogs and rejects unknown revisions. Do not relabel a catalog revision without understanding its probability contract.
+
+## Notability weighting
+
+Every regular card has a `notability` score from 1 (obscure) to 5 (iconic). Inside a rarity tier, a card's weight is the tier base weight × a notability multiplier (5: 3.0, 4: 2.0, 3: 1.25, 2: 0.7, 1: 0.35), so iconic subjects drop about 8.6× as often as obscure ones in the same tier. Tier probabilities are unchanged. The policy is recorded in `spawn_model.card_weight_policy`.
+
+The offline scarcity audit compares like with like: within each notability band, every card of a higher tier must be rarer than every card of the tier below in all seasonal lane states, and each tier's average card must be rarer than the tier below. Catalogs without notability scores keep the original strict per-card check.
+
+## Celestial (staff-only)
+
+Celestial sits above Mythic: 20 cards at 7.0× rarity power (combat 5). They use category `staff` and weight 0, so they never drop, appear in events, sell in the market or serve as crafting results. They're obtainable only through `/vault-admin give` and stay with the recipient: they can't be traded, gifted or recycled. They are excluded from regular completion counts.
 
 ## Combat stats
 

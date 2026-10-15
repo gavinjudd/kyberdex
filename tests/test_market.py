@@ -186,7 +186,7 @@ def test_v5_migration_preserves_old_copies_and_balances(game):
         db.execute('DROP TABLE market_purchases');db.execute('DROP TABLE market_offers');db.execute('DROP TABLE market_days')
         db.execute('PRAGMA user_version=5')
     upgraded=Game(game.db_path,game.source_path)
-    assert upgraded.health()['schema_version']==7
+    assert upgraded.health()['schema_version']==8
     assert upgraded.info('g','a',copy['id'])==copy
     assert upgraded.profile('g','a')['credits']==10000
 

@@ -116,7 +116,7 @@ def test_killed_game_operation_rolls_back_or_preserves_whole_commit(game_case, t
             assert db.execute("SELECT COUNT(*) FROM instances WHERE consumed_at IS NOT NULL").fetchone()[0] == 3
             assert db.execute("SELECT COUNT(*) FROM ledger WHERE reason='craft'").fetchone()[0] == 1
     health = reopened.health()
-    assert (health["schema_version"], health["synchronous"], health["foreign_keys"], health["foreign_key_violations"]) == (7, 2, True, 0)
+    assert (health["schema_version"], health["synchronous"], health["foreign_keys"], health["foreign_key_violations"]) == (8, 2, True, 0)
 
 
 @pytest.mark.parametrize("mechanism", ["sigkill", "exit"])
@@ -158,7 +158,7 @@ def test_killed_initial_schema_creation_is_atomic(tmp_path, game_case, mechanism
     verify_sqlite(path)
     assert snapshot(path) == {}
     if kind == "game":
-        assert Game(path, source["catalog"]).health()["schema_version"] == 7
+        assert Game(path, source["catalog"]).health()["schema_version"] == 8
     else:
         assert Runtime(path).get("guild") is None
 
@@ -198,7 +198,7 @@ def test_killed_legacy_migration_reverts_columns_then_retries_cleanly(tmp_path, 
         assert missing_column not in {row[1] for row in db.execute(f"PRAGMA table_info({migrated_table})")}
     if kind == "game":
         recovered = Game(path, source["catalog"])
-        assert recovered.health()["schema_version"] == 7
+        assert recovered.health()["schema_version"] == 8
         assert recovered.info("guild", "a", copy_id)["card_id"] == "alpha"
     else:
         assert Runtime(path).get("guild")["next_drop"] == NOW+900

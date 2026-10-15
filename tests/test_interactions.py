@@ -383,7 +383,7 @@ async def test_owned_card_defers_and_renders_only_public_card_fields(bot, monkey
     card = bot.game.catalog["captain-rex"]
     card.update(private_inventory=["SECRET-COPY"], user_id="SECRET-OWNER", art_layout="published-window")
 
-    def render(public):
+    def render(public, kind="png"):
         event.response.defer.assert_awaited_once_with(thinking=True)
         assert public["id"] == "captain-rex" and public["attack"] == card["attack"]
         assert public["art_layout"] == "published-window"
@@ -405,7 +405,7 @@ async def test_successful_capture_attaches_card_without_copy_or_owner_metadata(b
     drop = bot.game.create_drop("42", "10", "captain-rex")
     payloads = []
 
-    def render(public):
+    def render(public, kind="png"):
         payloads.append(public)
         return b"COMPOSED-PUBLIC-CARD"
 
@@ -496,3 +496,124 @@ async def test_committed_craft_stays_successful_when_card_render_fails(tmp_path,
     with pytest.raises(ValueError, match="expired"):
         await handle_component(bot, interaction(101), "confirm", key)
     assert bot.game.profile("42", "101")["credits"] == balance
+
+
+def member(user_id, name="Member", is_bot=False):
+    return SimpleNamespace(id=user_id, bot=is_bot, display_name=name, mention=f"<@{user_id}>")
+
+
+@pytest.mark.asyncio
+async def test_give_command_reviews_then_transfers_and_announces(bot):
+    rex = seed_card(bot, 101)
+    event = interaction(101)
+    event.channel = SimpleNamespace(send=AsyncMock())
+    command = bot.tree.get_command("vault").get_command("give")
+    await command.callback(event, member(102), rex["id"], "enjoy")
+    assert "Review your gift" in event.followup.send.await_args.kwargs["embed"].title
+    assert bot.game.info("42", "101", rex["id"])  # nothing moves before confirmation
+    key = next(iter(bot.pending_confirmations))
+    with pytest.raises(ValueError, match="Only the collector"):
+        await handle_component(bot, interaction(102), "confirm", key)
+    confirm = interaction(101)
+    confirm.channel = SimpleNamespace(send=AsyncMock())
+    await handle_component(bot, confirm, "confirm", key)
+    assert bot.game.info("42", "102", rex["id"])["user_id"] == "102"
+    announced = confirm.channel.send.await_args.kwargs["content"]
+    assert "<@101> gave <@102>" in announced and "enjoy" in announced
+
+
+@pytest.mark.asyncio
+async def test_give_command_rejects_self_and_bots(bot):
+    rex = seed_card(bot, 101)
+    command = bot.tree.get_command("vault").get_command("give")
+    with pytest.raises(ValueError, match="yourself"):
+        await command.callback(interaction(101), member(101), rex["id"])
+    with pytest.raises(ValueError, match="not a bot"):
+        await command.callback(interaction(101), member(555, is_bot=True), rex["id"])
+
+
+@pytest.mark.asyncio
+async def test_trade_command_pings_partner_and_preloads_offer(bot):
+    rex = seed_card(bot, 101)
+    event = interaction(101)
+    event.channel_id = 7
+    message = SimpleNamespace(id=900, jump_url="https://discord.test/900")
+    event.channel = SimpleNamespace(send=AsyncMock(return_value=message))
+    command = bot.tree.get_command("vault").get_command("trade")
+    await command.callback(event, member(102), rex["id"])
+    sent = event.channel.send.await_args.kwargs
+    assert sent["content"].startswith("<@102>")
+    assert sent["allowed_mentions"].users
+    trade = bot.game.active_trades("42", "101")[0]
+    assert [row["id"] for row in trade["offers"]["101"]] == [rex["id"]]
+
+
+@pytest.mark.asyncio
+async def test_admin_give_mints_into_member_collection(bot):
+    event = interaction(101)
+    event.id = 4242
+    event.channel = SimpleNamespace(send=AsyncMock())
+    group = bot.tree.get_command("vault-admin")
+    command = group.get_command("give")
+    await command.callback(group, event, member(102), "commander-cody", 2, "event prize", True)
+    assert len(bot.game.inventory("42", "102")) == 2
+    assert "event prize" in event.channel.send.await_args.kwargs["content"]
+    await command.callback(group, event, member(102), "commander-cody", 2, "event prize", True)
+    assert len(bot.game.inventory("42", "102")) == 2  # same interaction replays, no duplicates
+
+
+@pytest.mark.asyncio
+async def test_admin_clear_inventory_requires_confirmation_from_same_manager(bot):
+    seed_card(bot, 102)
+    seed_card(bot, 102, "commander-cody")
+    group = bot.tree.get_command("vault-admin")
+    event = interaction(101)
+    event.permissions = SimpleNamespace(manage_guild=True)
+    await group.get_command("clear-inventory").callback(group, event, member(102))
+    assert len(bot.game.inventory("42", "102")) == 2  # nothing removed before confirming
+    key = next(k for k, v in bot.pending_confirmations.items() if v["kind"] == "inventory_clear")
+    intruder = interaction(103)
+    intruder.permissions = SimpleNamespace(manage_guild=True)
+    with pytest.raises(ValueError, match="Only the manager"):
+        await bot.handle_inventory_clear(intruder, "confirmclear", key)
+    confirm = interaction(101)
+    confirm.permissions = SimpleNamespace(manage_guild=True)
+    await bot.handle_inventory_clear(confirm, "confirmclear", key)
+    assert bot.game.inventory("42", "102") == []
+    clear_id = bot.game.inventory_clears("42")[0]["id"]
+    undo = interaction(101)
+    await group.get_command("restore-inventory").callback(group, undo, clear_id)
+    assert len(bot.game.inventory("42", "102")) == 2
+
+
+@pytest.mark.asyncio
+async def test_gamble_wager_buttons_settle_and_update_the_public_message(bot):
+    with bot.game._tx() as connection:
+        for user in ("101", "102"):
+            bot.game._credit(connection, "42", user, 1000, "fixture", user, time.time())
+    gamble = bot.tree.get_command("vault").get_command("gamble")
+    event = interaction(101)
+    message = SimpleNamespace(id=901, jump_url="https://discord.test/901", edit=AsyncMock())
+    event.channel = SimpleNamespace(send=AsyncMock(return_value=message))
+    await gamble.get_command("wager").callback(event, member(102), 200)
+    wager_id = event.channel.send.await_args.kwargs["view"].children[0].custom_id.split(":")[2]
+    accept = interaction(102)
+    accept.message = message
+    await handle_component(bot, accept, "wageraccept", wager_id)
+    settled = bot.game.get_wager(wager_id)
+    assert settled["status"] == "settled"
+    total = bot.game.profile("42", "101")["credits"] + bot.game.profile("42", "102")["credits"]
+    assert total == 2000 - 20  # 5% of the 400 pot
+    message.edit.assert_awaited()
+
+
+@pytest.mark.asyncio
+async def test_slots_command_reports_balance_privately(bot):
+    with bot.game._tx() as connection:
+        bot.game._credit(connection, "42", "101", 500, "fixture", "x", time.time())
+    event = interaction(101)
+    event.id = 7777
+    gamble = bot.tree.get_command("vault").get_command("gamble")
+    await gamble.get_command("slots").callback(event, 50)
+    sent = event.followup.send.await_args.kwargs
+    assert sent["ephemeral"] is True and "Balance" in sent["embed"].description

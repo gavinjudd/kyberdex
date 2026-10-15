@@ -251,7 +251,7 @@ def test_legacy_claims_without_credit_ledger_migrate_once_and_keep_caps(game_cas
         connection.execute("PRAGMA user_version=3")
         connection.commit()
     game = Game(*game_case)
-    assert game.health()["schema_version"] == 7
+    assert game.health()["schema_version"] == 8
     before = history(game)
     assert [row[2] for row in before] == ["a", "a"]
     blocked(game, drop(game, "third"))
@@ -264,3 +264,26 @@ def test_legacy_claims_without_credit_ledger_migrate_once_and_keep_caps(game_cas
     with restarted._tx() as connection:
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
         assert connection.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+
+
+def test_streak_holder_may_take_unwanted_card_in_last_ninety_seconds(game_case):
+    game = Game(*game_case)
+    catch(game, drop(game, "1"), "a")
+    catch(game, drop(game, "2"), "a")
+    quiet = drop(game, "3", duration=180)
+    with pytest.raises(GameError) as error:
+        catch(game, quiet, "a", now=NOW + 60)
+    assert error.value.code == "capture_streak_limit"
+    assert "nobody else tries" in error.value.message
+    result = catch(game, quiet, "a", now=NOW + 95)
+    assert result["instance"]["user_id"] == "a"
+
+
+def test_streak_relief_does_not_apply_once_someone_else_tried(game_case):
+    game = Game(*game_case)
+    catch(game, drop(game, "1"), "a")
+    catch(game, drop(game, "2"), "a")
+    contested = drop(game, "3", duration=180)
+    with pytest.raises(GameError):
+        game.claim(contested["id"], "b", "wrong name", now=NOW + 30)
+    blocked(game, contested, now=NOW + 120)
