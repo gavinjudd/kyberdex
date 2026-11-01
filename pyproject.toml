@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==9.1.1", "pytest-asyncio>=1.3,<2", "ruff>=0.14,<1"]
+dev = ["pytest==9.2.0", "pytest-asyncio>=1.3,<2", "ruff>=0.14,<1"]
 
 [project.urls]
 Homepage = "https://gavinjudd.github.io/kyberdex/"
