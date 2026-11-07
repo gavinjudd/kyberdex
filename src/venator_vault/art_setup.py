@@ -21,6 +21,7 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 SOURCE_HOSTS = frozenset({
     'lumiere-a.akamaihd.net', 'forums.ea.com', 'media.contentapi.ea.com', 'www.swtor.com',
     'cdn.svc.asmodee.net', 'cdn-www.swtor.com', 'shared.akamai.steamstatic.com', 'web.archive.org',
+    'static.wikia.nocookie.net',
 })
 MAX_DOWNLOAD = 32 * 1024 * 1024
 MAX_PIXELS = 32_000_000
@@ -134,9 +135,17 @@ def decode_source(raw, entry):
         return ImageOps.exif_transpose(opened).convert('RGB')
     if entry.get('source_format', 'image') != 'image':
         raise ValueError('Unsupported source image format.')
+    flatten = entry.get('normalization', {}).get('flatten_alpha')
+    if flatten is not None and flatten != [4, 12, 28]:
+        raise ValueError('Unrecognized alpha flattening matte.')
     with Image.open(io.BytesIO(raw)) as opened:
         dimensions(opened.size)
-        return ImageOps.exif_transpose(opened).convert('RGB')
+        image = ImageOps.exif_transpose(opened)
+        if flatten is None:
+            return image.convert('RGB')
+        # Transparent cutouts sit on the standard dark matte instead of their stored RGB.
+        rgba = image.convert('RGBA')
+        return Image.alpha_composite(Image.new('RGBA', rgba.size, (*flatten, 255)), rgba).convert('RGB')
 
 
 def transform(raw, entry):

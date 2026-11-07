@@ -293,3 +293,29 @@ def test_published_window_preserves_subject_with_dark_background_and_feather(art
     entry['normalization']['placement_xy'] = [10, 44]
     with pytest.raises(ValueError, match='placement differs'):
         art.transform(artwork.raw, entry)
+
+
+def test_transparent_cutout_flattens_onto_the_standard_matte(artwork):
+    buffer = io.BytesIO()
+    cutout = Image.new('RGBA', (30, 20), (255, 255, 255, 0))
+    cutout.paste((200, 10, 10, 255), (10, 5, 20, 15))
+    cutout.save(buffer, format='PNG')
+    raw = buffer.getvalue()
+    normalization = {'output_size': [1024, 1536], 'requested_crop_box': [0, 0, 30, 20], 'fit_mode': 'contain',
+                     'placement': {'size': [1024, 683], 'xy': [0, 0], 'matte_rgb': [4, 12, 28]}}
+    entry = {**artwork.entry, 'width': 1024, 'height': 1536, 'normalization': dict(normalization)}
+    plain = art.transform(raw, entry)
+    assert plain.getpixel((20, 20)) == (255, 255, 255)
+    entry['normalization'] = {**normalization, 'flatten_alpha': [4, 12, 28]}
+    flat = art.transform(raw, entry)
+    assert flat.getpixel((20, 20)) == (4, 12, 28)
+    assert flat.getpixel((512, 341)) == (200, 10, 10)
+    entry['normalization']['flatten_alpha'] = [0, 0, 0]
+    with pytest.raises(ValueError, match='alpha flattening matte'):
+        art.transform(raw, entry)
+
+
+def test_wookieepedia_static_host_is_an_approved_artwork_source():
+    assert art.validate_url('https://static.wikia.nocookie.net/starwars/images/9/9d/Droideka-SWE.png/revision/latest')
+    with pytest.raises(ValueError):
+        art.validate_url('https://starwars.fandom.com/wiki/Droideka')
